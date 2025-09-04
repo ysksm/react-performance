@@ -1,0 +1,23 @@
+{
+  "name": "grid-performance-server",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "nodemon --exec tsx src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js"
+  },
+  "dependencies": {
+    "express": "^5.1.0",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.2"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.3",
+    "@types/cors": "^2.8.19",
+    "@types/node": "^24.3.1",
+    "typescript": "~5.8.3",
+    "nodemon": "^3.1.10",
+    "tsx": "^4.19.2"
+  }
+}
