@@ -41,6 +41,17 @@ interface GridData {
 
 const API_BASE_URL = 'http://localhost:3001/api';
 
+// セル状態の循環切り替え関数
+const getNextCellState = (currentState: CellState): CellState => {
+  switch (currentState) {
+    case 'empty': return 'selected';
+    case 'selected': return 'disabled';
+    case 'disabled': return 'active';
+    case 'active': return 'empty';
+    default: return 'empty';
+  }
+};
+
 // Cell Component
 interface CellProps {
   cell: Cell;
@@ -182,11 +193,27 @@ const GridRoot: React.FC<GridRootProps> = React.memo(({
   );
 });
 
+// URL パラメータを取得するヘルパー関数
+const getGridIdFromUrl = (): string | null => {
+  const urlParams = new URLSearchParams(window.location.search);
+  return urlParams.get('gridId');
+};
+
+// URL パラメータを更新するヘルパー関数
+const updateGridIdInUrl = (gridId: string) => {
+  const url = new URL(window.location.href);
+  url.searchParams.set('gridId', gridId);
+  window.history.replaceState({}, '', url.toString());
+};
+
 // Main App Component
 function App() {
   const [gridData, setGridData] = useState<GridData | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [availableGrids, setAvailableGrids] = useState<GridData[]>([]);
+  const [showGridSelector, setShowGridSelector] = useState<boolean>(false);
+  const [customGridId, setCustomGridId] = useState<string>('');
 
   // グリッド作成
   const createGrid = useCallback(async () => {
@@ -204,6 +231,7 @@ function App() {
       const result = await response.json();
       if (result.success) {
         setGridData(result.data);
+        updateGridIdInUrl(result.data.id);
         setError(null);
       } else {
         throw new Error(result.error || 'グリッド作成に失敗しました');
@@ -233,6 +261,7 @@ function App() {
       const result = await response.json();
       if (result.success) {
         setGridData(result.data);
+        updateGridIdInUrl(result.data.id);
         setError(null);
       } else {
         throw new Error(result.error || 'グリッド取得に失敗しました');
@@ -247,17 +276,68 @@ function App() {
       setError(err instanceof Error ? err.message : 'エラーが発生しました');
       console.error('グリッド取得エラー:', err);
     }
+  }, [createGrid]);
+
+  // 全グリッド取得
+  const fetchAllGrids = useCallback(async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/grids`);
+      if (!response.ok) {
+        throw new Error(`HTTPエラー: ${response.status}`);
+      }
+      
+      const result = await response.json();
+      if (result.success) {
+        setAvailableGrids(result.data);
+      } else {
+        throw new Error(result.error || 'グリッド一覧取得に失敗しました');
+      }
+    } catch (err) {
+      console.error('グリッド一覧取得エラー:', err);
+    }
   }, []);
+
+  // 指定したグリッドIDを読み込む
+  const loadSpecificGrid = useCallback(async (gridId: string) => {
+    if (!gridId.trim()) return;
+    
+    setLoading(true);
+    setError(null);
+    
+    try {
+      await fetchGrid(gridId.trim());
+    } catch (err) {
+      setError(`グリッドID "${gridId}" が見つかりません`);
+    } finally {
+      setLoading(false);
+    }
+  }, [fetchGrid]);
 
   // セルクリック処理
   const handleCellClick = useCallback(async (row: number, column: number) => {
     if (!gridData) return;
     
     try {
-      const response = await fetch(`${API_BASE_URL}/grids/${gridData.id}/cell`, {
+      // 現在のセル状態を取得
+      const lines = [
+        gridData.Line1, gridData.Line2, gridData.Line3, gridData.Line4, gridData.Line5,
+        gridData.Line6, gridData.Line7, gridData.Line8, gridData.Line9, gridData.Line10,
+        gridData.Line11, gridData.Line12, gridData.Line13, gridData.Line14, gridData.Line15,
+        gridData.Line16, gridData.Line17, gridData.Line18, gridData.Line19, gridData.Line20
+      ];
+      
+      const currentLine = lines[row];
+      if (!currentLine || !currentLine.cells || !currentLine.cells[column]) {
+        throw new Error('セルが見つかりません');
+      }
+      
+      const currentCell = currentLine.cells[column];
+      const nextState = getNextCellState(currentCell.state);
+      
+      const response = await fetch(`${API_BASE_URL}/grids/${gridData.id}/cells`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ row, column })
+        body: JSON.stringify({ row, column, state: nextState })
       });
       
       if (!response.ok) {
@@ -267,6 +347,11 @@ function App() {
       const result = await response.json();
       if (!result.success) {
         throw new Error(result.error || 'セル更新に失敗しました');
+      }
+      
+      // APIレスポンスからグリッドデータを更新
+      if (result.data) {
+        setGridData(result.data);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'エラーが発生しました');
@@ -279,10 +364,10 @@ function App() {
     if (!gridData) return;
     
     try {
-      const response = await fetch(`${API_BASE_URL}/grids/${gridData.id}/row`, {
+      const response = await fetch(`${API_BASE_URL}/grids/${gridData.id}/rows/${row}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ row })
+        body: JSON.stringify({ state: 'selected' })
       });
       
       if (!response.ok) {
@@ -292,6 +377,11 @@ function App() {
       const result = await response.json();
       if (!result.success) {
         throw new Error(result.error || '行更新に失敗しました');
+      }
+      
+      // APIレスポンスからグリッドデータを更新
+      if (result.data) {
+        setGridData(result.data);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'エラーが発生しました');
@@ -304,10 +394,10 @@ function App() {
     if (!gridData) return;
     
     try {
-      const response = await fetch(`${API_BASE_URL}/grids/${gridData.id}/column`, {
+      const response = await fetch(`${API_BASE_URL}/grids/${gridData.id}/columns/${column}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ column })
+        body: JSON.stringify({ state: 'active' })
       });
       
       if (!response.ok) {
@@ -317,6 +407,11 @@ function App() {
       const result = await response.json();
       if (!result.success) {
         throw new Error(result.error || '列更新に失敗しました');
+      }
+      
+      // APIレスポンスからグリッドデータを更新
+      if (result.data) {
+        setGridData(result.data);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'エラーが発生しました');
@@ -331,7 +426,8 @@ function App() {
     try {
       const response = await fetch(`${API_BASE_URL}/grids/${gridData.id}/all`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' }
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ state: 'disabled' })
       });
       
       if (!response.ok) {
@@ -341,6 +437,11 @@ function App() {
       const result = await response.json();
       if (!result.success) {
         throw new Error(result.error || '全面更新に失敗しました');
+      }
+      
+      // APIレスポンスからグリッドデータを更新
+      if (result.data) {
+        setGridData(result.data);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'エラーが発生しました');
@@ -354,7 +455,7 @@ function App() {
     
     try {
       const response = await fetch(`${API_BASE_URL}/grids/${gridData.id}/reset`, {
-        method: 'PUT',
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' }
       });
       
@@ -365,6 +466,11 @@ function App() {
       const result = await response.json();
       if (!result.success) {
         throw new Error(result.error || 'リセットに失敗しました');
+      }
+      
+      // APIレスポンスからグリッドデータを更新
+      if (result.data) {
+        setGridData(result.data);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'エラーが発生しました');
@@ -383,19 +489,117 @@ function App() {
     return () => clearInterval(interval);
   }, [gridData, fetchGrid]);
 
-  // 初回グリッド作成
+  // 初回読み込み（URL パラメータ対応）
   useEffect(() => {
-    createGrid();
-  }, [createGrid]);
+    const urlGridId = getGridIdFromUrl();
+    if (urlGridId) {
+      // URL にグリッドIDが指定されている場合、そのグリッドを読み込む
+      loadSpecificGrid(urlGridId);
+    } else {
+      // URL にグリッドIDがない場合、新しいグリッドを作成
+      createGrid();
+    }
+    
+    // 利用可能なグリッド一覧を取得
+    fetchAllGrids();
+  }, [createGrid, loadSpecificGrid, fetchAllGrids]);
 
   return (
     <div className="app">
       <header className="app-header">
         <h1>React パフォーマンステスト - 20x20グリッド</h1>
+        <div className="grid-controls-header">
+          <button 
+            className="control-btn"
+            onClick={() => setShowGridSelector(!showGridSelector)}
+          >
+            {showGridSelector ? 'グリッド選択を閉じる' : 'グリッドを選択'}
+          </button>
+          <button 
+            className="control-btn"
+            onClick={createGrid}
+            disabled={loading}
+          >
+            新しいグリッドを作成
+          </button>
+        </div>
+        
+        {showGridSelector && (
+          <div className="grid-selector">
+            <div className="custom-grid-input">
+              <input
+                type="text"
+                placeholder="グリッドIDを入力..."
+                value={customGridId}
+                onChange={(e) => setCustomGridId(e.target.value)}
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter') {
+                    loadSpecificGrid(customGridId);
+                    setCustomGridId('');
+                  }
+                }}
+              />
+              <button 
+                onClick={() => {
+                  loadSpecificGrid(customGridId);
+                  setCustomGridId('');
+                }}
+                disabled={!customGridId.trim() || loading}
+              >
+                読み込み
+              </button>
+            </div>
+            
+            <div className="available-grids">
+              <h3>利用可能なグリッド ({availableGrids.length}個)</h3>
+              <button onClick={fetchAllGrids} className="refresh-btn">
+                🔄 更新
+              </button>
+              <div className="grids-list">
+                {availableGrids.map((grid) => (
+                  <div 
+                    key={grid.id} 
+                    className={`grid-item ${gridData?.id === grid.id ? 'current' : ''}`}
+                    onClick={() => {
+                      loadSpecificGrid(grid.id);
+                      setShowGridSelector(false);
+                    }}
+                  >
+                    <div className="grid-id">ID: {grid.id}</div>
+                    <div className="grid-preview">
+                      {grid.Line1 && grid.Line1.cells && (
+                        <span>
+                          セル状態: {grid.Line1.cells.filter(c => c.state !== 'empty').length}/400 変更済み
+                        </span>
+                      )}
+                    </div>
+                    {gridData?.id === grid.id && <span className="current-label">現在表示中</span>}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+        
         <div className="status-bar">
           {loading && <span className="status loading">読み込み中...</span>}
           {error && <span className="status error">エラー: {error}</span>}
-          {gridData && <span className="status success">グリッドID: {gridData.id}</span>}
+          {gridData && (
+            <div className="status success">
+              <span>グリッドID: {gridData.id}</span>
+              <button 
+                className="copy-url-btn"
+                onClick={() => {
+                  const url = `${window.location.origin}${window.location.pathname}?gridId=${gridData.id}`;
+                  navigator.clipboard.writeText(url);
+                  alert('URLをクリップボードにコピーしました');
+                }}
+                title="このグリッドのURLをコピー"
+              >
+                📋 URLコピー
+              </button>
+            </div>
+          )}
         </div>
       </header>
       
