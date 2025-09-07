@@ -156,51 +156,79 @@ Component Update ← Props Drilling ← GridService ← Response
 
 ### 3.1 REST API エンドポイント
 
-#### GET /api/grid
+#### 🔄 実際の実装に基づいたAPI仕様
+
+#### POST /api/grids - 新しいグリッド作成
 ```typescript
 // レスポンス
-interface GridResponse {
-  id: string;
-  lines: {
-    [key: string]: { // "line1", "line2", ...
-      id: string;
-      lineNumber: number;
-      cells: {
-        id: string;
-        position: { row: number; col: number };
-        state: CellState;
-      }[];
-    }
+interface CreateGridResponse {
+  success: boolean;
+  data: {
+    id: string;
+    Line1: LineData;
+    Line2: LineData;
+    // ... Line20まで
   };
-  lastUpdated: string;
 }
 ```
 
-#### PUT /api/grid/cell
+#### GET /api/grids/{id} - グリッド取得
+```typescript
+// レスポンス
+interface GetGridResponse {
+  success: boolean;
+  data: {
+    id: string;
+    Line1: LineData;
+    Line2: LineData;
+    // ... Line20まで
+  };
+}
+```
+
+#### GET /api/grids - 全グリッド取得
+```typescript
+// レスポンス
+interface GetAllGridsResponse {
+  success: boolean;
+  data: GridData[];
+}
+```
+
+#### PUT /api/grids/{id}/cells - セル更新
 ```typescript
 // リクエスト
 interface UpdateCellRequest {
-  position: { row: number; col: number };
+  row: number;
+  column: number;
   state: CellState;
 }
 
 // レスポンス
 interface UpdateCellResponse {
   success: boolean;
-  updatedCell: {
-    id: string;
-    position: { row: number; col: number };
-    state: CellState;
-  };
-  timestamp: string;
+  data: GridData; // 更新されたグリッド全体
 }
 ```
 
-#### PUT /api/grid/row
+#### PUT /api/grids/{id}/rows/{row} - 行一括更新
 ```typescript
 // リクエスト
 interface UpdateRowRequest {
-  rowNumber: number;
+  state: CellState;
+}
+
+// レスポンス
+interface UpdateRowResponse {
+  success: boolean;
+  data: GridData; // 更新されたグリッド全体
+}
+```
+
+#### PUT /api/grids/{id}/columns/{column} - 列一括更新
+```typescript
+// リクエスト
+interface UpdateColumnRequest {
   state: CellState;
 }
 
@@ -216,20 +244,42 @@ interface UpdateRowResponse {
 }
 ```
 
-#### PUT /api/grid/column
-```typescript
-// リクエスト
-interface UpdateColumnRequest {
-  colNumber: number;
-  state: CellState;
+// レスポンス
+interface UpdateColumnResponse {
+  success: boolean;
+  data: GridData; // 更新されたグリッド全体
 }
 ```
 
-#### PUT /api/grid/all
+#### PUT /api/grids/{id}/all - 全セル一括更新
 ```typescript
 // リクエスト
 interface UpdateAllRequest {
   state: CellState;
+}
+
+// レスポンス
+interface UpdateAllResponse {
+  success: boolean;
+  data: GridData; // 更新されたグリッド全体
+}
+```
+
+#### POST /api/grids/{id}/reset - グリッドリセット
+```typescript
+// レスポンス
+interface ResetGridResponse {
+  success: boolean;
+  data: GridData; // リセットされたグリッド
+}
+```
+
+#### DELETE /api/grids/{id} - グリッド削除
+```typescript
+// レスポンス
+interface DeleteGridResponse {
+  success: boolean;
+  message: string;
 }
 ```
 
