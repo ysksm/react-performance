@@ -6,52 +6,52 @@
 
 ---
 
-## Phase 0: 基盤構築 (0/8) 🔴
+## Phase 0: 基盤構築 (8/8) 🟢
 
 ### サーバー側セットアップ
-- [ ] Expressサーバーの初期化（package.json作成）
-- [ ] TypeScript設定（tsconfig.json）
-- [ ] Express + TypeScriptの基本セットアップ
-- [ ] nodemon設定（開発用自動リロード）
+- [x] Expressサーバーの初期化（package.json作成）
+- [x] TypeScript設定（tsconfig.json）
+- [x] Express + TypeScriptの基本セットアップ
+- [x] nodemon設定（開発用自動リロード）
 
 ### API基盤
-- [ ] 基本的なルーティング構造（/api/servers）
-- [ ] CORS設定
-- [ ] ポート設定（例: 3001）
-- [ ] サーバー起動スクリプト追加
+- [x] 基本的なルーティング構造（/api/servers）
+- [x] CORS設定
+- [x] ポート設定（例: 3001）
+- [x] サーバー起動スクリプト追加
 
 ---
 
-## Phase 1: 静的グリッド表示 (0/7) ⏸️
+## Phase 1: 静的グリッド表示 (7/7) 🟢
 
 ### 型定義
-- [ ] ServerData インターフェース定義
-- [ ] Props型定義（Grid, Cell用）
+- [x] ServerData インターフェース定義
+- [x] Props型定義（Grid, Cell用）
 
 ### コンポーネント実装
-- [ ] Gridコンポーネント作成（Grid.tsx）
-- [ ] Cellコンポーネント作成（Cell.tsx）
-- [ ] Appコンポーネントでの統合
+- [x] Gridコンポーネント作成（Grid.tsx）
+- [x] Cellコンポーネント作成（Cell.tsx）
+- [x] Appコンポーネントでの統合
 
 ### 表示確認
-- [ ] 10×10グリッドレイアウト実装
-- [ ] モックデータでの表示テスト
+- [x] 10×10グリッドレイアウト実装
+- [x] モックデータでの表示テスト
 
 ---
 
-## Phase 2: APIポーリング実装 (0/8) ⏸️
+## Phase 2: APIポーリング実装 (8/8) 🟢
 
 ### サーバー側
-- [ ] GET /api/servers エンドポイント実装
-- [ ] ランダムデータ生成関数
-- [ ] 100個のサーバーデータ生成
+- [x] GET /api/servers エンドポイント実装
+- [x] ランダムデータ生成関数
+- [x] 100個のサーバーデータ生成
 
 ### クライアント側
-- [ ] fetch APIでのデータ取得
-- [ ] useEffectでのポーリング設定
-- [ ] setIntervalで1秒ごと更新
-- [ ] cleanup処理（メモリリーク対策）
-- [ ] エラーハンドリング実装
+- [x] fetch APIでのデータ取得
+- [x] useEffectでのポーリング設定
+- [x] setIntervalで1秒ごと更新
+- [x] cleanup処理（メモリリーク対策）
+- [x] エラーハンドリング実装
 
 ---
 
