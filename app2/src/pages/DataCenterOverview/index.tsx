@@ -1,6 +1,5 @@
 import React from 'react';
-import type { DataCenter } from '../types/ServerData';
-import { dataCentersArrayEquals } from '../utils/dataComparison';
+import type { DataCenter } from '../../types/ServerData';
 
 interface DataCenterOverviewProps {
   dataCenters: DataCenter[];

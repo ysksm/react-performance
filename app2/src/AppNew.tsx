@@ -1,15 +1,18 @@
 import { useState, useCallback } from 'react'
 import './App.css'
 import './styles/Desktop.css'
-import { NavigationBreadcrumb } from './components/NavigationBreadcrumb'
-import { DataCenterOverview } from './components/DataCenterOverview'
-import { RackListView } from './components/RackListView'
-import { ServerGridView } from './components/ServerGridView'
-import { ContainerManageView } from './components/ContainerManageView'
-import ConnectionIndicator from './components/ConnectionIndicator'
-import { ConfirmationDialog } from './components/ConfirmationDialog'
-import { NotificationToast } from './components/NotificationToast'
-import type { ToastMessage } from './components/NotificationToast'
+// Page components
+import { DataCenterOverview } from './pages/DataCenterOverview'
+import { RackListView } from './pages/RackListView'
+import { ServerGridView } from './pages/ServerGridView'
+import { ContainerManageView } from './pages/ContainerManageView'
+
+// Layout components
+import { NavigationBreadcrumb, ConnectionIndicator } from './components/layout'
+
+// Common UI components
+import { ConfirmationDialog, NotificationToast } from './components/common'
+import type { ToastMessage } from './components/common/NotificationToast'
 import { useDataCenters } from './presentation/hooks/useDataCenters'
 import { useServerActions } from './presentation/hooks/useServerActions'
 import { useContainerActions } from './presentation/hooks/useContainerActions'

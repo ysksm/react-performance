@@ -1,5 +1,5 @@
 import React from 'react';
-import type { DataCenter, Rack, Server, ViewMode } from '../types/ServerData';
+import type { DataCenter, Rack, Server, ViewMode } from '../../types/ServerData';
 
 interface NavigationBreadcrumbProps {
   viewMode: ViewMode;

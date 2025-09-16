@@ -1,5 +1,5 @@
 import React from 'react';
-import type { Server, DataCenter, Rack, Container } from '../types/ServerData';
+import type { Server, DataCenter, Rack, Container } from '../../types/ServerData';
 
 interface ServerModalProps {
   isOpen: boolean;

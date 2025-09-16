@@ -1,5 +1,5 @@
 import { useEffect, useCallback } from 'react';
-import type { ServerData } from '../types/ServerData';
+import type { ServerData } from '../../types/ServerData';
 
 interface ModalProps {
   server: ServerData | null;

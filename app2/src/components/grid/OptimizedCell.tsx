@@ -1,5 +1,5 @@
 import { memo } from 'react';
-import type { ServerData } from '../types/ServerData';
+import type { ServerData } from '../../types/ServerData';
 
 interface CellProps {
   server: ServerData;

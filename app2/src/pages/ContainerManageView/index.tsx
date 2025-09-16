@@ -1,6 +1,6 @@
 import React from 'react';
-import type { Server, Container } from '../types/ServerData';
-import { serverEquals } from '../utils/dataComparison';
+import type { Server, Container } from '../../types/ServerData';
+import { serverEquals } from '../../utils/dataComparison';
 
 interface ContainerManageViewProps {
   server: Server;

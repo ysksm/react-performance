@@ -1,6 +1,6 @@
 import React from 'react';
-import type { DataCenter, Rack } from '../types/ServerData';
-import { dataCenterEquals } from '../utils/dataComparison';
+import type { DataCenter, Rack } from '../../types/ServerData';
+import { dataCenterEquals } from '../../utils/dataComparison';
 
 interface RackListViewProps {
   dataCenter: DataCenter;

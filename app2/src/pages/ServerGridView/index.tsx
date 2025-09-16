@@ -1,6 +1,6 @@
 import React from 'react';
-import type { Rack, Server } from '../types/ServerData';
-import { rackEquals } from '../utils/dataComparison';
+import type { Rack, Server } from '../../types/ServerData';
+import { rackEquals } from '../../utils/dataComparison';
 
 interface ServerGridViewProps {
   rack: Rack;

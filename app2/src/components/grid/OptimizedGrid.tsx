@@ -1,14 +1,17 @@
-import type { ServerData } from '../types/ServerData';
-import Cell from './Cell';
+import { memo } from 'react';
+import type { ServerData } from '../../types/ServerData';
+import OptimizedCell from './OptimizedCell';
 
 interface GridProps {
   servers: ServerData[];
   onCellClick: (server: ServerData) => void;
 }
 
-function Grid({ servers, onCellClick }: GridProps) {
+// メモ化されたGridコンポーネント
+const OptimizedGrid = memo(function Grid({ servers, onCellClick }: GridProps) {
   return (
     <div
+      className="grid"
       style={{
         display: 'grid',
         gridTemplateColumns: 'repeat(10, 1fr)',
@@ -19,7 +22,7 @@ function Grid({ servers, onCellClick }: GridProps) {
       }}
     >
       {servers.map((server) => (
-        <Cell
+        <OptimizedCell
           key={server.id}
           server={server}
           onClick={onCellClick}
@@ -27,6 +30,6 @@ function Grid({ servers, onCellClick }: GridProps) {
       ))}
     </div>
   );
-}
+});
 
-export default Grid;
+export default OptimizedGrid;
