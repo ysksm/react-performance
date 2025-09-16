@@ -1,4 +1,6 @@
+import React from 'react';
 import type { Server, Container } from '../types/ServerData';
+import { serverEquals } from '../utils/dataComparison';
 
 interface ContainerManageViewProps {
   server: Server;
@@ -7,7 +9,7 @@ interface ContainerManageViewProps {
   onBack: () => void;
 }
 
-export function ContainerManageView({ server, onContainerAction, onAddContainer, onBack }: ContainerManageViewProps) {
+const ContainerManageView = React.memo<ContainerManageViewProps>(({ server, onContainerAction, onAddContainer, onBack }) => {
   const getContainerStatusColor = (status: Container['status']) => {
     switch (status) {
       case 'running': return '#00cc44';
@@ -208,4 +210,19 @@ export function ContainerManageView({ server, onContainerAction, onAddContainer,
       </div>
     </div>
   );
-}
+});
+
+ContainerManageView.displayName = 'ContainerManageView';
+
+const areEqual = (prevProps: ContainerManageViewProps, nextProps: ContainerManageViewProps) => {
+  return (
+    serverEquals(prevProps.server, nextProps.server) &&
+    prevProps.onContainerAction === nextProps.onContainerAction &&
+    prevProps.onAddContainer === nextProps.onAddContainer &&
+    prevProps.onBack === nextProps.onBack
+  );
+};
+
+const OptimizedContainerManageView = React.memo(ContainerManageView, areEqual);
+
+export { OptimizedContainerManageView as ContainerManageView };

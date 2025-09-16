@@ -261,7 +261,7 @@ function App() {
         }
       }
     });
-  }, []);
+  }, [addToast]);
 
   const handleContainerAction = useCallback((container: Container, action: 'start' | 'stop' | 'pause' | 'remove') => {
     const actionMessages = {
@@ -325,7 +325,7 @@ function App() {
         }
       }
     });
-  }, []);
+  }, [addToast]);
 
   const handleAddContainer = useCallback(async (serverId: string) => {
     try {
@@ -368,7 +368,7 @@ function App() {
         message: error instanceof Error ? error.message : 'Unknown error occurred'
       });
     }
-  }, []);
+  }, [addToast]);
 
   const handleBack = useCallback(() => {
     switch (viewMode) {
@@ -386,6 +386,10 @@ function App() {
         break;
     }
   }, [viewMode]);
+
+  const handleDialogCancel = useCallback(() => {
+    setConfirmationDialog(prev => ({ ...prev, isOpen: false }));
+  }, []);
 
   if (loading && dataCenters.length === 0) {
     return (
@@ -456,7 +460,7 @@ function App() {
     )
   }
 
-  const renderCurrentView = () => {
+  const renderCurrentView = useCallback(() => {
     switch (viewMode) {
       case 'overview':
         return (
@@ -501,7 +505,7 @@ function App() {
       default:
         return null;
     }
-  };
+  }, [viewMode, dataCenters, selectedDataCenter, selectedRack, selectedServer, handleDataCenterSelect, handleRackSelect, handleServerSelect, handleServerAction, handleContainerAction, handleAddContainer, handleBack]);
 
   return (
     <div className="app">
@@ -532,7 +536,7 @@ function App() {
         message={confirmationDialog.message}
         variant={confirmationDialog.variant}
         onConfirm={confirmationDialog.onConfirm}
-        onCancel={() => setConfirmationDialog(prev => ({ ...prev, isOpen: false }))}
+        onCancel={handleDialogCancel}
       />
 
       <NotificationToast

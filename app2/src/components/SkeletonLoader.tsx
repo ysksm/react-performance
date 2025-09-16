@@ -1,8 +1,10 @@
+import React from 'react';
+
 interface SkeletonLoaderProps {
   mode: 'overview' | 'racks' | 'servers' | 'containers';
 }
 
-export function SkeletonLoader({ mode }: SkeletonLoaderProps) {
+const SkeletonLoader = React.memo<SkeletonLoaderProps>(({ mode }) => {
   const renderOverviewSkeleton = () => (
     <div className="skeleton-container overview">
       <div className="skeleton-header">
@@ -187,4 +189,8 @@ export function SkeletonLoader({ mode }: SkeletonLoaderProps) {
     default:
       return renderOverviewSkeleton();
   }
-}
+});
+
+SkeletonLoader.displayName = 'SkeletonLoader';
+
+export { SkeletonLoader };

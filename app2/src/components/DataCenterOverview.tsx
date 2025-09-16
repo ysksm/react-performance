@@ -1,11 +1,13 @@
+import React from 'react';
 import type { DataCenter } from '../types/ServerData';
+import { createMemoComparator, dataCentersArrayEquals } from '../utils/dataComparison';
 
 interface DataCenterOverviewProps {
   dataCenters: DataCenter[];
   onDataCenterSelect: (dataCenter: DataCenter) => void;
 }
 
-export function DataCenterOverview({ dataCenters, onDataCenterSelect }: DataCenterOverviewProps) {
+const DataCenterOverview = React.memo<DataCenterOverviewProps>(({ dataCenters, onDataCenterSelect }) => {
   const calculateStats = (dataCenter: DataCenter) => {
     const totalRacks = dataCenter.racks.length;
     const totalServers = dataCenter.racks.reduce((sum, rack) => sum + rack.servers.length, 0);
@@ -102,4 +104,17 @@ export function DataCenterOverview({ dataCenters, onDataCenterSelect }: DataCent
       </div>
     </div>
   );
-}
+});
+
+DataCenterOverview.displayName = 'DataCenterOverview';
+
+const areEqual = (prevProps: DataCenterOverviewProps, nextProps: DataCenterOverviewProps) => {
+  return (
+    dataCentersArrayEquals(prevProps.dataCenters, nextProps.dataCenters) &&
+    prevProps.onDataCenterSelect === nextProps.onDataCenterSelect
+  );
+};
+
+const OptimizedDataCenterOverview = React.memo(DataCenterOverview, areEqual);
+
+export { OptimizedDataCenterOverview as DataCenterOverview };

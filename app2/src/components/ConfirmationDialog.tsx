@@ -1,3 +1,5 @@
+import React from 'react';
+
 interface ConfirmationDialogProps {
   isOpen: boolean;
   title: string;
@@ -9,16 +11,17 @@ interface ConfirmationDialogProps {
   variant?: 'default' | 'danger' | 'warning';
 }
 
-export function ConfirmationDialog({
-  isOpen,
-  title,
-  message,
-  confirmText = 'Confirm',
-  cancelText = 'Cancel',
-  onConfirm,
-  onCancel,
-  variant = 'default'
-}: ConfirmationDialogProps) {
+const ConfirmationDialog = React.memo<ConfirmationDialogProps>((props) => {
+  const {
+    isOpen,
+    title,
+    message,
+    confirmText = 'Confirm',
+    cancelText = 'Cancel',
+    onConfirm,
+    onCancel,
+    variant = 'default'
+  } = props;
   if (!isOpen) return null;
 
   const getVariantStyles = () => {
@@ -72,4 +75,8 @@ export function ConfirmationDialog({
       </div>
     </div>
   );
-}
+});
+
+ConfirmationDialog.displayName = 'ConfirmationDialog';
+
+export { ConfirmationDialog };

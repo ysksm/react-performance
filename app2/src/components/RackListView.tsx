@@ -1,4 +1,6 @@
+import React from 'react';
 import type { DataCenter, Rack } from '../types/ServerData';
+import { dataCenterEquals } from '../utils/dataComparison';
 
 interface RackListViewProps {
   dataCenter: DataCenter;
@@ -6,7 +8,7 @@ interface RackListViewProps {
   onBack: () => void;
 }
 
-export function RackListView({ dataCenter, onRackSelect, onBack }: RackListViewProps) {
+const RackListView = React.memo<RackListViewProps>(({ dataCenter, onRackSelect, onBack }) => {
   const calculateRackStats = (rack: Rack) => {
     const totalServers = rack.servers.length;
     const runningServers = rack.servers.filter(server => server.status === 'running').length;
@@ -155,4 +157,18 @@ export function RackListView({ dataCenter, onRackSelect, onBack }: RackListViewP
       </div>
     </div>
   );
-}
+});
+
+RackListView.displayName = 'RackListView';
+
+const areEqual = (prevProps: RackListViewProps, nextProps: RackListViewProps) => {
+  return (
+    dataCenterEquals(prevProps.dataCenter, nextProps.dataCenter) &&
+    prevProps.onRackSelect === nextProps.onRackSelect &&
+    prevProps.onBack === nextProps.onBack
+  );
+};
+
+const OptimizedRackListView = React.memo(RackListView, areEqual);
+
+export { OptimizedRackListView as RackListView };

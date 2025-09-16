@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 
 export interface ToastMessage {
   id: string;
@@ -13,7 +13,7 @@ interface NotificationToastProps {
   onRemove: (id: string) => void;
 }
 
-export function NotificationToast({ messages, onRemove }: NotificationToastProps) {
+const NotificationToast = React.memo<NotificationToastProps>(({ messages, onRemove }) => {
   useEffect(() => {
     messages.forEach(message => {
       if (message.duration !== 0) { // 0 means persistent
@@ -62,4 +62,8 @@ export function NotificationToast({ messages, onRemove }: NotificationToastProps
       ))}
     </div>
   );
-}
+});
+
+NotificationToast.displayName = 'NotificationToast';
+
+export { NotificationToast };

@@ -1,11 +1,11 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 
 interface ConnectionIndicatorProps {
   status: 'online' | 'offline' | 'reconnecting';
   lastUpdate: Date | null;
 }
 
-function ConnectionIndicator({ status, lastUpdate }: ConnectionIndicatorProps) {
+const ConnectionIndicator = React.memo<ConnectionIndicatorProps>(({ status, lastUpdate }) => {
   const [timeAgo, setTimeAgo] = useState<string>('');
   const [connectionDuration, setConnectionDuration] = useState<string>('');
   const [connectTime, setConnectTime] = useState<Date | null>(null);
@@ -105,6 +105,8 @@ function ConnectionIndicator({ status, lastUpdate }: ConnectionIndicatorProps) {
       {getStatusDetails()}
     </div>
   );
-}
+});
+
+ConnectionIndicator.displayName = 'ConnectionIndicator';
 
 export default ConnectionIndicator;

@@ -9,13 +9,13 @@ interface NavigationBreadcrumbProps {
   onNavigate: (mode: ViewMode, dataCenter?: DataCenter, rack?: Rack, server?: Server) => void;
 }
 
-export function NavigationBreadcrumb({
+const NavigationBreadcrumb = React.memo<NavigationBreadcrumbProps>(({
   viewMode,
   dataCenter,
   rack,
   server,
   onNavigate
-}: NavigationBreadcrumbProps) {
+}) => {
   const breadcrumbItems = [
     {
       label: 'Data Centers',
@@ -98,4 +98,8 @@ export function NavigationBreadcrumb({
       </div>
     </nav>
   );
-}
+});
+
+NavigationBreadcrumb.displayName = 'NavigationBreadcrumb';
+
+export { NavigationBreadcrumb };

@@ -1,4 +1,6 @@
+import React from 'react';
 import type { Rack, Server } from '../types/ServerData';
+import { rackEquals } from '../utils/dataComparison';
 
 interface ServerGridViewProps {
   rack: Rack;
@@ -7,7 +9,7 @@ interface ServerGridViewProps {
   onBack: () => void;
 }
 
-export function ServerGridView({ rack, onServerSelect, onServerAction, onBack }: ServerGridViewProps) {
+const ServerGridView = React.memo<ServerGridViewProps>(({ rack, onServerSelect, onServerAction, onBack }) => {
   const getServerStatus = (server: Server) => {
     if (server.status === 'error' || server.errors.length > 0) return 'error';
     if (server.status === 'warning' || server.cpu > 80 || server.memory > 80 || server.temperature > 75) return 'warning';
@@ -206,4 +208,19 @@ export function ServerGridView({ rack, onServerSelect, onServerAction, onBack }:
       </div>
     </div>
   );
-}
+});
+
+ServerGridView.displayName = 'ServerGridView';
+
+const areEqual = (prevProps: ServerGridViewProps, nextProps: ServerGridViewProps) => {
+  return (
+    rackEquals(prevProps.rack, nextProps.rack) &&
+    prevProps.onServerSelect === nextProps.onServerSelect &&
+    prevProps.onServerAction === nextProps.onServerAction &&
+    prevProps.onBack === nextProps.onBack
+  );
+};
+
+const OptimizedServerGridView = React.memo(ServerGridView, areEqual);
+
+export { OptimizedServerGridView as ServerGridView };
