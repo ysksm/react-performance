@@ -15,15 +15,20 @@ interface NotificationToastProps {
 
 const NotificationToast = React.memo<NotificationToastProps>(({ messages, onRemove }) => {
   useEffect(() => {
+    const timers: NodeJS.Timeout[] = [];
+
     messages.forEach(message => {
       if (message.duration !== 0) { // 0 means persistent
         const timer = setTimeout(() => {
           onRemove(message.id);
         }, message.duration || 5000);
-
-        return () => clearTimeout(timer);
+        timers.push(timer);
       }
     });
+
+    return () => {
+      timers.forEach(timer => clearTimeout(timer));
+    };
   }, [messages, onRemove]);
 
   const getToastIcon = (type: ToastMessage['type']) => {

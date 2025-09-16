@@ -391,6 +391,53 @@ function App() {
     setConfirmationDialog(prev => ({ ...prev, isOpen: false }));
   }, []);
 
+  const renderCurrentView = useCallback(() => {
+    switch (viewMode) {
+      case 'overview':
+        return (
+          <DataCenterOverview
+            dataCenters={dataCenters}
+            onDataCenterSelect={handleDataCenterSelect}
+          />
+        );
+
+      case 'racks':
+        if (!selectedDataCenter) return null;
+        return (
+          <RackListView
+            dataCenter={selectedDataCenter}
+            onRackSelect={handleRackSelect}
+            onBack={handleBack}
+          />
+        );
+
+      case 'servers':
+        if (!selectedRack) return null;
+        return (
+          <ServerGridView
+            rack={selectedRack}
+            onServerSelect={handleServerSelect}
+            onServerAction={handleServerAction}
+            onBack={handleBack}
+          />
+        );
+
+      case 'containers':
+        if (!selectedServer) return null;
+        return (
+          <ContainerManageView
+            server={selectedServer}
+            onContainerAction={handleContainerAction}
+            onAddContainer={handleAddContainer}
+            onBack={handleBack}
+          />
+        );
+
+      default:
+        return null;
+    }
+  }, [viewMode, dataCenters, selectedDataCenter, selectedRack, selectedServer, handleDataCenterSelect, handleRackSelect, handleServerSelect, handleServerAction, handleContainerAction, handleAddContainer, handleBack]);
+
   if (loading && dataCenters.length === 0) {
     return (
       <div className="app">
@@ -459,53 +506,6 @@ function App() {
       </div>
     )
   }
-
-  const renderCurrentView = useCallback(() => {
-    switch (viewMode) {
-      case 'overview':
-        return (
-          <DataCenterOverview
-            dataCenters={dataCenters}
-            onDataCenterSelect={handleDataCenterSelect}
-          />
-        );
-
-      case 'racks':
-        if (!selectedDataCenter) return null;
-        return (
-          <RackListView
-            dataCenter={selectedDataCenter}
-            onRackSelect={handleRackSelect}
-            onBack={handleBack}
-          />
-        );
-
-      case 'servers':
-        if (!selectedRack) return null;
-        return (
-          <ServerGridView
-            rack={selectedRack}
-            onServerSelect={handleServerSelect}
-            onServerAction={handleServerAction}
-            onBack={handleBack}
-          />
-        );
-
-      case 'containers':
-        if (!selectedServer) return null;
-        return (
-          <ContainerManageView
-            server={selectedServer}
-            onContainerAction={handleContainerAction}
-            onAddContainer={handleAddContainer}
-            onBack={handleBack}
-          />
-        );
-
-      default:
-        return null;
-    }
-  }, [viewMode, dataCenters, selectedDataCenter, selectedRack, selectedServer, handleDataCenterSelect, handleRackSelect, handleServerSelect, handleServerAction, handleContainerAction, handleAddContainer, handleBack]);
 
   return (
     <div className="app">

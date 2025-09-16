@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef, useCallback, useState, useMemo } from 'react';
 
 export function useMemoryCleanup(dependencies: any[]) {
   const cleanupRef = useRef<(() => void)[]>([]);
@@ -163,8 +163,6 @@ export function useWeakRefCache<K extends object, V>() {
   return { get, set, has, clear };
 }
 
-// Fix missing import
-import { useState, useMemo } from 'react';
 
 export function useOptimizedState<T>(
   initialValue: T,
