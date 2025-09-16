@@ -10,7 +10,6 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "express": "^4.21.2",
     "react": "^19.1.1",
     "react-dom": "^19.1.1"
   },
@@ -26,5 +25,8 @@
     "typescript": "~5.8.3",
     "typescript-eslint": "^8.39.1",
     "vite": "^7.1.2"
+  },
+  "engines": {
+    "node": ">=20.0.0"
   }
 }
