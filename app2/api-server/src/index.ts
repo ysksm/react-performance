@@ -27,8 +27,8 @@ function generateContainer(serverId: string, index: number, existingContainer?: 
       ...existingContainer,
       cpu: Math.max(0, Math.min(100, existingContainer.cpu + cpuChange)),
       memory: Math.max(0, Math.min(100, existingContainer.memory + memoryChange)),
-      // Status changes rarely
-      status: Math.random() > 0.95 ?
+      // Status changes very rarely
+      status: Math.random() > 0.998 ?
         (['running', 'stopped', 'paused', 'error'][Math.floor(Math.random() * 4)] as any) :
         existingContainer.status
     };
@@ -38,7 +38,7 @@ function generateContainer(serverId: string, index: number, existingContainer?: 
     id: `${serverId}-container-${index}`,
     name: `container-${index}`,
     image: images[Math.floor(Math.random() * images.length)],
-    status: Math.random() > 0.1 ? 'running' : ['stopped', 'paused', 'error'][Math.floor(Math.random() * 3)] as any,
+    status: Math.random() > 0.05 ? 'running' : ['stopped', 'paused', 'error'][Math.floor(Math.random() * 3)] as any,
     cpu: Math.random() * 50,
     memory: Math.random() * 30,
     ports: [ports[Math.floor(Math.random() * ports.length)]],
@@ -77,7 +77,7 @@ function generateServer(rackId: string, position: number, existingServer?: Serve
       containers.pop();
     }
 
-    const hasErrors = newCpu > 90 || newMemory > 90 || newTemp > 80 || Math.random() > 0.95;
+    const hasErrors = newCpu > 90 || newMemory > 90 || newTemp > 80 || Math.random() > 0.998;
     const hasWarnings = newCpu > 75 || newMemory > 75 || newTemp > 70;
 
     return {
@@ -103,7 +103,7 @@ function generateServer(rackId: string, position: number, existingServer?: Serve
 
   const cpu = Math.random() * 100;
   const memory = Math.random() * 100;
-  const hasErrors = Math.random() > 0.85;
+  const hasErrors = Math.random() > 0.97;
 
   return {
     id: serverId,
@@ -386,7 +386,7 @@ app.post('/api/servers/:id/restart', (req, res) => {
             server.status = 'running';
             server.containers.forEach(container => {
               if (container.status === 'stopped') {
-                container.status = Math.random() > 0.1 ? 'running' : 'error';
+                container.status = Math.random() > 0.02 ? 'running' : 'error';
               }
             });
           }, 2000);

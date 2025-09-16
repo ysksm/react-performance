@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import './App.css'
+import './styles/Desktop.css'
 import { NavigationBreadcrumb } from './components/NavigationBreadcrumb'
 import { DataCenterOverview } from './components/DataCenterOverview'
 import { RackListView } from './components/RackListView'
