@@ -268,6 +268,421 @@ app.get('/api/servers', (_req, res) => {
   res.json(servers);
 });
 
+// Server operation endpoints
+app.post('/api/servers/:id/start', (req, res) => {
+  try {
+    const { id } = req.params;
+    console.log(`Starting server: ${id}`);
+
+    // Find the server in dataState
+    let serverFound = false;
+    for (const dc of dataState) {
+      for (const rack of dc.racks) {
+        const server = rack.servers.find(s => s.id === id);
+        if (server) {
+          server.status = 'running';
+          server.errors = [];
+          serverFound = true;
+          console.log(`Server ${id} started successfully`);
+          break;
+        }
+      }
+      if (serverFound) break;
+    }
+
+    if (!serverFound) {
+      return res.status(404).json({
+        error: 'Server not found',
+        message: `Server with ID ${id} does not exist`,
+        timestamp: new Date().toISOString()
+      });
+    }
+
+    res.json({
+      success: true,
+      message: `Server ${id} started successfully`,
+      timestamp: new Date().toISOString(),
+      action: 'start',
+      serverId: id
+    });
+  } catch (error) {
+    console.error('Error starting server:', error);
+    res.status(500).json({
+      error: 'Internal server error',
+      message: 'Failed to start server',
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
+app.post('/api/servers/:id/stop', (req, res) => {
+  try {
+    const { id } = req.params;
+    console.log(`Stopping server: ${id}`);
+
+    // Find the server in dataState
+    let serverFound = false;
+    for (const dc of dataState) {
+      for (const rack of dc.racks) {
+        const server = rack.servers.find(s => s.id === id);
+        if (server) {
+          server.status = 'maintenance';
+          // Stop all containers
+          server.containers.forEach(container => {
+            if (container.status === 'running') {
+              container.status = 'stopped';
+            }
+          });
+          serverFound = true;
+          console.log(`Server ${id} stopped successfully`);
+          break;
+        }
+      }
+      if (serverFound) break;
+    }
+
+    if (!serverFound) {
+      return res.status(404).json({
+        error: 'Server not found',
+        message: `Server with ID ${id} does not exist`,
+        timestamp: new Date().toISOString()
+      });
+    }
+
+    res.json({
+      success: true,
+      message: `Server ${id} stopped successfully`,
+      timestamp: new Date().toISOString(),
+      action: 'stop',
+      serverId: id
+    });
+  } catch (error) {
+    console.error('Error stopping server:', error);
+    res.status(500).json({
+      error: 'Internal server error',
+      message: 'Failed to stop server',
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
+app.post('/api/servers/:id/restart', (req, res) => {
+  try {
+    const { id } = req.params;
+    console.log(`Restarting server: ${id}`);
+
+    // Find the server in dataState
+    let serverFound = false;
+    for (const dc of dataState) {
+      for (const rack of dc.racks) {
+        const server = rack.servers.find(s => s.id === id);
+        if (server) {
+          // Simulate restart process
+          server.status = 'maintenance';
+          server.errors = [];
+
+          // Restart containers with delay simulation
+          setTimeout(() => {
+            server.status = 'running';
+            server.containers.forEach(container => {
+              if (container.status === 'stopped') {
+                container.status = Math.random() > 0.1 ? 'running' : 'error';
+              }
+            });
+          }, 2000);
+
+          serverFound = true;
+          console.log(`Server ${id} restart initiated`);
+          break;
+        }
+      }
+      if (serverFound) break;
+    }
+
+    if (!serverFound) {
+      return res.status(404).json({
+        error: 'Server not found',
+        message: `Server with ID ${id} does not exist`,
+        timestamp: new Date().toISOString()
+      });
+    }
+
+    res.json({
+      success: true,
+      message: `Server ${id} restart initiated`,
+      timestamp: new Date().toISOString(),
+      action: 'restart',
+      serverId: id
+    });
+  } catch (error) {
+    console.error('Error restarting server:', error);
+    res.status(500).json({
+      error: 'Internal server error',
+      message: 'Failed to restart server',
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
+// Container operation endpoints
+app.post('/api/containers', (req, res) => {
+  try {
+    const { serverId, image = 'nginx:latest', name } = req.body;
+
+    if (!serverId) {
+      return res.status(400).json({
+        error: 'Bad request',
+        message: 'serverId is required',
+        timestamp: new Date().toISOString()
+      });
+    }
+
+    console.log(`Adding container to server: ${serverId}`);
+
+    // Find the server in dataState
+    let serverFound = false;
+    let newContainer: Container | null = null;
+
+    for (const dc of dataState) {
+      for (const rack of dc.racks) {
+        const server = rack.servers.find(s => s.id === serverId);
+        if (server) {
+          // Generate new container
+          const containerIndex = server.containers.length;
+          const containerName = name || `container-${containerIndex}`;
+          newContainer = generateContainer(serverId, containerIndex);
+          newContainer.name = containerName;
+          newContainer.image = image;
+
+          server.containers.push(newContainer);
+          serverFound = true;
+          console.log(`Container ${newContainer.id} added to server ${serverId}`);
+          break;
+        }
+      }
+      if (serverFound) break;
+    }
+
+    if (!serverFound) {
+      return res.status(404).json({
+        error: 'Server not found',
+        message: `Server with ID ${serverId} does not exist`,
+        timestamp: new Date().toISOString()
+      });
+    }
+
+    res.status(201).json({
+      success: true,
+      message: `Container added to server ${serverId}`,
+      timestamp: new Date().toISOString(),
+      action: 'add',
+      container: newContainer
+    });
+  } catch (error) {
+    console.error('Error adding container:', error);
+    res.status(500).json({
+      error: 'Internal server error',
+      message: 'Failed to add container',
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
+app.delete('/api/containers/:id', (req, res) => {
+  try {
+    const { id } = req.params;
+    console.log(`Removing container: ${id}`);
+
+    // Find and remove the container from dataState
+    let containerFound = false;
+    let removedContainer: Container | null = null;
+
+    for (const dc of dataState) {
+      for (const rack of dc.racks) {
+        for (const server of rack.servers) {
+          const containerIndex = server.containers.findIndex(c => c.id === id);
+          if (containerIndex !== -1) {
+            removedContainer = server.containers[containerIndex];
+            server.containers.splice(containerIndex, 1);
+            containerFound = true;
+            console.log(`Container ${id} removed from server ${server.id}`);
+            break;
+          }
+        }
+        if (containerFound) break;
+      }
+      if (containerFound) break;
+    }
+
+    if (!containerFound) {
+      return res.status(404).json({
+        error: 'Container not found',
+        message: `Container with ID ${id} does not exist`,
+        timestamp: new Date().toISOString()
+      });
+    }
+
+    res.json({
+      success: true,
+      message: `Container ${id} removed successfully`,
+      timestamp: new Date().toISOString(),
+      action: 'remove',
+      container: removedContainer
+    });
+  } catch (error) {
+    console.error('Error removing container:', error);
+    res.status(500).json({
+      error: 'Internal server error',
+      message: 'Failed to remove container',
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
+app.post('/api/containers/:id/start', (req, res) => {
+  try {
+    const { id } = req.params;
+    console.log(`Starting container: ${id}`);
+
+    // Find the container in dataState
+    let containerFound = false;
+    for (const dc of dataState) {
+      for (const rack of dc.racks) {
+        for (const server of rack.servers) {
+          const container = server.containers.find(c => c.id === id);
+          if (container) {
+            container.status = 'running';
+            containerFound = true;
+            console.log(`Container ${id} started successfully`);
+            break;
+          }
+        }
+        if (containerFound) break;
+      }
+      if (containerFound) break;
+    }
+
+    if (!containerFound) {
+      return res.status(404).json({
+        error: 'Container not found',
+        message: `Container with ID ${id} does not exist`,
+        timestamp: new Date().toISOString()
+      });
+    }
+
+    res.json({
+      success: true,
+      message: `Container ${id} started successfully`,
+      timestamp: new Date().toISOString(),
+      action: 'start',
+      containerId: id
+    });
+  } catch (error) {
+    console.error('Error starting container:', error);
+    res.status(500).json({
+      error: 'Internal server error',
+      message: 'Failed to start container',
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
+app.post('/api/containers/:id/stop', (req, res) => {
+  try {
+    const { id } = req.params;
+    console.log(`Stopping container: ${id}`);
+
+    // Find the container in dataState
+    let containerFound = false;
+    for (const dc of dataState) {
+      for (const rack of dc.racks) {
+        for (const server of rack.servers) {
+          const container = server.containers.find(c => c.id === id);
+          if (container) {
+            container.status = 'stopped';
+            containerFound = true;
+            console.log(`Container ${id} stopped successfully`);
+            break;
+          }
+        }
+        if (containerFound) break;
+      }
+      if (containerFound) break;
+    }
+
+    if (!containerFound) {
+      return res.status(404).json({
+        error: 'Container not found',
+        message: `Container with ID ${id} does not exist`,
+        timestamp: new Date().toISOString()
+      });
+    }
+
+    res.json({
+      success: true,
+      message: `Container ${id} stopped successfully`,
+      timestamp: new Date().toISOString(),
+      action: 'stop',
+      containerId: id
+    });
+  } catch (error) {
+    console.error('Error stopping container:', error);
+    res.status(500).json({
+      error: 'Internal server error',
+      message: 'Failed to stop container',
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
+app.post('/api/containers/:id/pause', (req, res) => {
+  try {
+    const { id } = req.params;
+    console.log(`Pausing container: ${id}`);
+
+    // Find the container in dataState
+    let containerFound = false;
+    for (const dc of dataState) {
+      for (const rack of dc.racks) {
+        for (const server of rack.servers) {
+          const container = server.containers.find(c => c.id === id);
+          if (container) {
+            container.status = 'paused';
+            containerFound = true;
+            console.log(`Container ${id} paused successfully`);
+            break;
+          }
+        }
+        if (containerFound) break;
+      }
+      if (containerFound) break;
+    }
+
+    if (!containerFound) {
+      return res.status(404).json({
+        error: 'Container not found',
+        message: `Container with ID ${id} does not exist`,
+        timestamp: new Date().toISOString()
+      });
+    }
+
+    res.json({
+      success: true,
+      message: `Container ${id} paused successfully`,
+      timestamp: new Date().toISOString(),
+      action: 'pause',
+      containerId: id
+    });
+  } catch (error) {
+    console.error('Error pausing container:', error);
+    res.status(500).json({
+      error: 'Internal server error',
+      message: 'Failed to pause container',
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
 app.get('/health', (_req, res) => {
   res.json({ status: 'OK', timestamp: new Date().toISOString() });
 });

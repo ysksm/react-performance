@@ -6,6 +6,8 @@ import { RackListView } from './components/RackListView'
 import { ServerGridView } from './components/ServerGridView'
 import { ContainerManageView } from './components/ContainerManageView'
 import { SkeletonLoader } from './components/SkeletonLoader'
+import { ConfirmationDialog } from './components/ConfirmationDialog'
+import { NotificationToast, type ToastMessage } from './components/NotificationToast'
 import ConnectionIndicator from './components/ConnectionIndicator'
 import type { DataCenter, Rack, Server, Container, ViewMode } from './types/ServerData'
 
@@ -24,6 +26,32 @@ function App() {
   const [error, setError] = useState<string | null>(null)
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null)
   const [connectionStatus, setConnectionStatus] = useState<'online' | 'offline' | 'reconnecting'>('offline')
+
+  // Confirmation dialog state
+  const [confirmationDialog, setConfirmationDialog] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    onConfirm: () => void;
+    variant?: 'default' | 'danger' | 'warning';
+  }>({
+    isOpen: false,
+    title: '',
+    message: '',
+    onConfirm: () => {}
+  })
+
+  // Toast notification state
+  const [toastMessages, setToastMessages] = useState<ToastMessage[]>([])
+
+  const addToast = useCallback((toast: Omit<ToastMessage, 'id'>) => {
+    const id = Date.now().toString() + Math.random().toString(36).substr(2, 9)
+    setToastMessages(prev => [...prev, { ...toast, id }])
+  }, [])
+
+  const removeToast = useCallback((id: string) => {
+    setToastMessages(prev => prev.filter(toast => toast.id !== id))
+  }, [])
 
   const fetchDataCenters = async () => {
     try {
@@ -181,18 +209,165 @@ function App() {
   }, []);
 
   const handleServerAction = useCallback((server: Server, action: 'start' | 'stop' | 'restart') => {
-    // TODO: Implement server action API calls
-    console.log(`Server action: ${action} on ${server.name}`);
+    const actionMessages = {
+      start: { title: 'Start Server', message: `Are you sure you want to start ${server.name}?`, variant: 'default' as const },
+      stop: { title: 'Stop Server', message: `Are you sure you want to stop ${server.name}? This will stop all running containers.`, variant: 'warning' as const },
+      restart: { title: 'Restart Server', message: `Are you sure you want to restart ${server.name}? This may cause temporary downtime.`, variant: 'warning' as const }
+    };
+
+    const actionConfig = actionMessages[action];
+
+    setConfirmationDialog({
+      isOpen: true,
+      title: actionConfig.title,
+      message: actionConfig.message,
+      variant: actionConfig.variant,
+      onConfirm: async () => {
+        setConfirmationDialog(prev => ({ ...prev, isOpen: false }));
+
+        try {
+          console.log(`Server action: ${action} on ${server.name}`);
+          const response = await fetch(`http://localhost:3001/api/servers/${server.id}/${action}`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          });
+
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || `Failed to ${action} server`);
+          }
+
+          const result = await response.json();
+          console.log(`Server ${action} result:`, result);
+
+          // Show success toast
+          addToast({
+            type: 'success',
+            title: 'Server Operation Success',
+            message: result.message
+          });
+
+          // Data will be updated automatically through polling
+        } catch (error) {
+          console.error(`Error performing ${action} on server ${server.name}:`, error);
+          // Show error toast
+          addToast({
+            type: 'error',
+            title: 'Server Operation Failed',
+            message: error instanceof Error ? error.message : 'Unknown error occurred'
+          });
+        }
+      }
+    });
   }, []);
 
   const handleContainerAction = useCallback((container: Container, action: 'start' | 'stop' | 'pause' | 'remove') => {
-    // TODO: Implement container action API calls
-    console.log(`Container action: ${action} on ${container.name}`);
+    const actionMessages = {
+      start: { title: 'Start Container', message: `Are you sure you want to start ${container.name}?`, variant: 'default' as const },
+      stop: { title: 'Stop Container', message: `Are you sure you want to stop ${container.name}?`, variant: 'warning' as const },
+      pause: { title: 'Pause Container', message: `Are you sure you want to pause ${container.name}?`, variant: 'warning' as const },
+      remove: { title: 'Remove Container', message: `Are you sure you want to remove ${container.name}? This action cannot be undone.`, variant: 'danger' as const }
+    };
+
+    const actionConfig = actionMessages[action];
+
+    setConfirmationDialog({
+      isOpen: true,
+      title: actionConfig.title,
+      message: actionConfig.message,
+      variant: actionConfig.variant,
+      onConfirm: async () => {
+        setConfirmationDialog(prev => ({ ...prev, isOpen: false }));
+
+        try {
+          console.log(`Container action: ${action} on ${container.name}`);
+
+          let response: Response;
+          if (action === 'remove') {
+            response = await fetch(`http://localhost:3001/api/containers/${container.id}`, {
+              method: 'DELETE'
+            });
+          } else {
+            response = await fetch(`http://localhost:3001/api/containers/${container.id}/${action}`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              }
+            });
+          }
+
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || `Failed to ${action} container`);
+          }
+
+          const result = await response.json();
+          console.log(`Container ${action} result:`, result);
+
+          // Show success toast
+          addToast({
+            type: 'success',
+            title: 'Container Operation Success',
+            message: result.message
+          });
+
+          // Data will be updated automatically through polling
+        } catch (error) {
+          console.error(`Error performing ${action} on container ${container.name}:`, error);
+          // Show error toast
+          addToast({
+            type: 'error',
+            title: 'Container Operation Failed',
+            message: error instanceof Error ? error.message : 'Unknown error occurred'
+          });
+        }
+      }
+    });
   }, []);
 
-  const handleAddContainer = useCallback((serverId: string) => {
-    // TODO: Implement add container API call
-    console.log(`Add container to server: ${serverId}`);
+  const handleAddContainer = useCallback(async (serverId: string) => {
+    try {
+      console.log(`Add container to server: ${serverId}`);
+
+      const response = await fetch('http://localhost:3001/api/containers', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          serverId,
+          image: 'nginx:latest',
+          name: `container-${Date.now()}`
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to add container');
+      }
+
+      const result = await response.json();
+      console.log('Add container result:', result);
+
+      // Show success toast
+      addToast({
+        type: 'success',
+        title: 'Container Added',
+        message: result.message
+      });
+
+      // Data will be updated automatically through polling
+    } catch (error) {
+      console.error(`Error adding container to server ${serverId}:`, error);
+      // Show error toast
+      addToast({
+        type: 'error',
+        title: 'Failed to Add Container',
+        message: error instanceof Error ? error.message : 'Unknown error occurred'
+      });
+    }
   }, []);
 
   const handleBack = useCallback(() => {
@@ -350,6 +525,20 @@ function App() {
       </main>
 
       <ConnectionIndicator status={connectionStatus} lastUpdate={lastUpdate} />
+
+      <ConfirmationDialog
+        isOpen={confirmationDialog.isOpen}
+        title={confirmationDialog.title}
+        message={confirmationDialog.message}
+        variant={confirmationDialog.variant}
+        onConfirm={confirmationDialog.onConfirm}
+        onCancel={() => setConfirmationDialog(prev => ({ ...prev, isOpen: false }))}
+      />
+
+      <NotificationToast
+        messages={toastMessages}
+        onRemove={removeToast}
+      />
     </div>
   )
 }

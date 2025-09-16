@@ -1,8 +1,8 @@
 # TODO - 階層データセンター監視アプリケーション
 
 ## 進捗サマリー
-- 全体進捗: 52/72 タスク完了 (72%)
-- 現在のフェーズ: Phase 3完了、Phase 4 操作機能実装開始
+- 全体進捗: 66/72 タスク完了 (92%)
+- 現在のフェーズ: Phase 4完了、Phase 5 モーダル・詳細表示開始
 
 ---
 
@@ -93,27 +93,27 @@
 
 ---
 
-## Phase 4: 操作機能実装 (0/14) 🔴
+## Phase 4: 操作機能実装 (14/14) 🟢
 
 ### サーバー操作機能
-- [ ] POST /api/servers/:id/start エンドポイント
-- [ ] POST /api/servers/:id/stop エンドポイント
-- [ ] POST /api/servers/:id/restart エンドポイント
-- [ ] サーバー操作UIボタン実装
+- [x] POST /api/servers/:id/start エンドポイント
+- [x] POST /api/servers/:id/stop エンドポイント
+- [x] POST /api/servers/:id/restart エンドポイント
+- [x] サーバー操作UIボタン実装
 
 ### コンテナ操作機能
-- [ ] POST /api/containers エンドポイント（追加）
-- [ ] DELETE /api/containers/:id エンドポイント（削除）
-- [ ] POST /api/containers/:id/start エンドポイント
-- [ ] POST /api/containers/:id/stop エンドポイント
-- [ ] POST /api/containers/:id/pause エンドポイント
-- [ ] コンテナ操作UI実装
+- [x] POST /api/containers エンドポイント（追加）
+- [x] DELETE /api/containers/:id エンドポイント（削除）
+- [x] POST /api/containers/:id/start エンドポイント
+- [x] POST /api/containers/:id/stop エンドポイント
+- [x] POST /api/containers/:id/pause エンドポイント
+- [x] コンテナ操作UI実装
 
 ### 操作フロー
-- [ ] 操作確認ダイアログ
-- [ ] 操作結果フィードバック
-- [ ] エラー時のロールバック処理
-- [ ] 操作ログ表示
+- [x] 操作確認ダイアログ
+- [x] 操作結果フィードバック
+- [x] エラー時のロールバック処理
+- [x] 操作ログ表示
 
 ---
 
