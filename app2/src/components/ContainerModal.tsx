@@ -103,11 +103,11 @@ const ContainerModal = React.memo<ContainerModalProps>(({
           {/* Hierarchy Path */}
           <div className="hierarchy-path">
             <span className="path-item">{dataCenter?.name || 'Unknown DC'}</span>
-            <span className="path-separator">></span>
+            <span className="path-separator">&gt;</span>
             <span className="path-item">{rack?.name || 'Unknown Rack'}</span>
-            <span className="path-separator">></span>
+            <span className="path-separator">&gt;</span>
             <span className="path-item">{server?.name || 'Unknown Server'}</span>
-            <span className="path-separator">></span>
+            <span className="path-separator">&gt;</span>
             <span className="path-item current">{container.name}</span>
           </div>
 

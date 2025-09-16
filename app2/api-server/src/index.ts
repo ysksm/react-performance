@@ -29,7 +29,7 @@ function generateContainer(serverId: string, index: number, existingContainer?: 
       memory: Math.max(0, Math.min(100, existingContainer.memory + memoryChange)),
       // Status changes very rarely
       status: Math.random() > 0.998 ?
-        (['running', 'stopped', 'paused', 'error'][Math.floor(Math.random() * 4)] as any) :
+        (['running', 'stopped', 'paused', 'error'] as const)[Math.floor(Math.random() * 4)] :
         existingContainer.status
     };
   }
@@ -38,7 +38,7 @@ function generateContainer(serverId: string, index: number, existingContainer?: 
     id: `${serverId}-container-${index}`,
     name: `container-${index}`,
     image: images[Math.floor(Math.random() * images.length)],
-    status: Math.random() > 0.05 ? 'running' : ['stopped', 'paused', 'error'][Math.floor(Math.random() * 3)] as any,
+    status: Math.random() > 0.05 ? 'running' : (['stopped', 'paused', 'error'] as const)[Math.floor(Math.random() * 3)],
     cpu: Math.random() * 50,
     memory: Math.random() * 30,
     ports: [ports[Math.floor(Math.random() * ports.length)]],

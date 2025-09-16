@@ -189,13 +189,13 @@ export function useFilteredDataByMode(
           activeWarnings: 0
         };
     }
-  }, [dataCenters, viewMode, selectedDataCenter?.id, selectedRack?.id]);
+  }, [dataCenters, viewMode, selectedDataCenter, selectedRack]);
 }
 
 export function useServersByStatus(servers: Server[]) {
   return useMemo(() => {
     const running = servers.filter(server => server.status === 'running');
-    const stopped = servers.filter(server => server.status === 'stopped');
+    const stopped = servers.filter(server => server.status === 'maintenance');
     const maintenance = servers.filter(server => server.status === 'maintenance');
     const error = servers.filter(server => server.status === 'error' || server.errors.length > 0);
     const warning = servers.filter(server => server.status === 'warning');

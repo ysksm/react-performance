@@ -1,6 +1,6 @@
 import React from 'react';
 import type { DataCenter } from '../types/ServerData';
-import { createMemoComparator, dataCentersArrayEquals } from '../utils/dataComparison';
+import { dataCentersArrayEquals } from '../utils/dataComparison';
 
 interface DataCenterOverviewProps {
   dataCenters: DataCenter[];
@@ -109,10 +109,40 @@ const DataCenterOverview = React.memo<DataCenterOverviewProps>(({ dataCenters, o
 DataCenterOverview.displayName = 'DataCenterOverview';
 
 const areEqual = (prevProps: DataCenterOverviewProps, nextProps: DataCenterOverviewProps) => {
-  return (
-    dataCentersArrayEquals(prevProps.dataCenters, nextProps.dataCenters) &&
-    prevProps.onDataCenterSelect === nextProps.onDataCenterSelect
-  );
+  if (prevProps.onDataCenterSelect !== nextProps.onDataCenterSelect) {
+    return false;
+  }
+
+  if (prevProps.dataCenters.length !== nextProps.dataCenters.length) {
+    return false;
+  }
+
+  // Only compare structural properties (id, name, location) and array lengths
+  // Skip the dynamic numerical values that should trigger updates
+  for (let i = 0; i < prevProps.dataCenters.length; i++) {
+    const prevDC = prevProps.dataCenters[i];
+    const nextDC = nextProps.dataCenters[i];
+
+    if (prevDC.id !== nextDC.id || prevDC.name !== nextDC.name || prevDC.location !== nextDC.location) {
+      return false;
+    }
+
+    if (prevDC.racks.length !== nextDC.racks.length) {
+      return false;
+    }
+
+    // For racks, only check structural properties
+    for (let j = 0; j < prevDC.racks.length; j++) {
+      const prevRack = prevDC.racks[j];
+      const nextRack = nextDC.racks[j];
+
+      if (prevRack.id !== nextRack.id || prevRack.servers.length !== nextRack.servers.length) {
+        return false;
+      }
+    }
+  }
+
+  return true;
 };
 
 const OptimizedDataCenterOverview = React.memo(DataCenterOverview, areEqual);

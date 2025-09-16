@@ -1,23 +1,5 @@
 import type { DataCenter, Rack, Server, Container } from '../types/ServerData';
 
-export function isEqual<T>(a: T, b: T): boolean {
-  if (a === b) return true;
-  if (a == null || b == null) return false;
-  if (typeof a !== 'object' || typeof b !== 'object') return false;
-
-  const keysA = Object.keys(a);
-  const keysB = Object.keys(b);
-
-  if (keysA.length !== keysB.length) return false;
-
-  for (const key of keysA) {
-    if (!keysB.includes(key)) return false;
-    if (!isEqual((a as any)[key], (b as any)[key])) return false;
-  }
-
-  return true;
-}
-
 export function containerEquals(a: Container, b: Container): boolean {
   return (
     a.id === b.id &&
@@ -104,9 +86,7 @@ export function shallowServerEquals(a: Server, b: Server): boolean {
   );
 }
 
-export function createMemoComparator<T>(
-  isEqual: (a: T, b: T) => boolean
-) {
+export function createMemoComparator<T>() {
   return (prevProps: { [K in keyof T]: T[K] }, nextProps: { [K in keyof T]: T[K] }): boolean => {
     const prevKeys = Object.keys(prevProps) as (keyof T)[];
     const nextKeys = Object.keys(nextProps) as (keyof T)[];
@@ -118,11 +98,11 @@ export function createMemoComparator<T>(
 
       if (key === 'dataCenter' || key === 'dataCenters') {
         if (Array.isArray(prevProps[key]) && Array.isArray(nextProps[key])) {
-          if (!dataCentersArrayEquals(prevProps[key] as any, nextProps[key] as any)) {
+          if (!dataCentersArrayEquals(prevProps[key] as DataCenter[], nextProps[key] as DataCenter[])) {
             return false;
           }
         } else if (prevProps[key] && nextProps[key]) {
-          if (!dataCenterEquals(prevProps[key] as any, nextProps[key] as any)) {
+          if (!dataCenterEquals(prevProps[key] as unknown as DataCenter, nextProps[key] as unknown as DataCenter)) {
             return false;
           }
         } else if (prevProps[key] !== nextProps[key]) {
@@ -130,7 +110,7 @@ export function createMemoComparator<T>(
         }
       } else if (key === 'rack') {
         if (prevProps[key] && nextProps[key]) {
-          if (!rackEquals(prevProps[key] as any, nextProps[key] as any)) {
+          if (!rackEquals(prevProps[key] as unknown as Rack, nextProps[key] as unknown as Rack)) {
             return false;
           }
         } else if (prevProps[key] !== nextProps[key]) {
@@ -138,7 +118,7 @@ export function createMemoComparator<T>(
         }
       } else if (key === 'server') {
         if (prevProps[key] && nextProps[key]) {
-          if (!serverEquals(prevProps[key] as any, nextProps[key] as any)) {
+          if (!serverEquals(prevProps[key] as unknown as Server, nextProps[key] as unknown as Server)) {
             return false;
           }
         } else if (prevProps[key] !== nextProps[key]) {
@@ -146,7 +126,7 @@ export function createMemoComparator<T>(
         }
       } else if (key === 'container') {
         if (prevProps[key] && nextProps[key]) {
-          if (!containerEquals(prevProps[key] as any, nextProps[key] as any)) {
+          if (!containerEquals(prevProps[key] as unknown as Container, nextProps[key] as unknown as Container)) {
             return false;
           }
         } else if (prevProps[key] !== nextProps[key]) {

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useCallback, useState, useMemo } from 'react';
 
-export function useMemoryCleanup(dependencies: any[]) {
+export function useMemoryCleanup(dependencies: React.DependencyList) {
   const cleanupRef = useRef<(() => void)[]>([]);
 
   const addCleanup = useCallback((cleanup: () => void) => {
@@ -12,13 +12,13 @@ export function useMemoryCleanup(dependencies: any[]) {
       cleanupRef.current.forEach(cleanup => cleanup());
       cleanupRef.current = [];
     };
-  }, dependencies);
+  }, [dependencies]);
 
   return addCleanup;
 }
 
 export function usePreviousValue<T>(value: T): T | undefined {
-  const ref = useRef<T>();
+  const ref = useRef<T | undefined>(undefined);
   useEffect(() => {
     ref.current = value;
   });
@@ -41,7 +41,7 @@ export function useDebounce<T>(value: T, delay: number): T {
   return debouncedValue;
 }
 
-export function useThrottle<T extends (...args: any[]) => any>(
+export function useThrottle<T extends (...args: unknown[]) => unknown>(
   callback: T,
   delay: number
 ): T {
@@ -123,7 +123,11 @@ export function useMemoryMonitor() {
   useEffect(() => {
     const updateMemoryInfo = () => {
       if ('memory' in performance) {
-        const memory = (performance as any).memory;
+        const memory = (performance as Performance & { memory: {
+          usedJSHeapSize: number;
+          totalJSHeapSize: number;
+          jsHeapSizeLimit: number;
+        } }).memory;
         setMemoryInfo({
           usedJSHeapSize: memory.usedJSHeapSize,
           totalJSHeapSize: memory.totalJSHeapSize,
@@ -189,7 +193,7 @@ export function useShallowMemo<T>(
   factory: () => T,
   deps: React.DependencyList
 ): T {
-  const ref = useRef<{ deps: React.DependencyList; value: T }>();
+  const ref = useRef<{ deps: React.DependencyList; value: T } | undefined>(undefined);
 
   if (!ref.current || !shallowEqual(ref.current.deps, deps)) {
     ref.current = {

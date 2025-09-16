@@ -54,7 +54,7 @@ function App() {
     setToastMessages(prev => prev.filter(toast => toast.id !== id))
   }, [])
 
-  const fetchDataCenters = async () => {
+  const fetchDataCenters = useCallback(async () => {
     try {
       setConnectionStatus('reconnecting')
       const startTime = Date.now()
@@ -115,7 +115,7 @@ function App() {
         setLoading(false)
       }
     }
-  }
+  }, [dataCenters.length])
 
   useEffect(() => {
     // Initial fetch
@@ -133,7 +133,7 @@ function App() {
     return () => {
       clearInterval(interval)
     }
-  }, [connectionStatus]) // Re-setup polling when connection status changes
+  }, [connectionStatus, fetchDataCenters]) // Re-setup polling when connection status changes
 
   // Enhanced selection state preservation during data updates
   useEffect(() => {
@@ -181,7 +181,7 @@ function App() {
         setViewMode('overview');
       }
     }
-  }, [dataCenters, selectedDataCenter?.id, selectedRack?.id, selectedServer?.id])
+  }, [dataCenters, selectedDataCenter, selectedRack, selectedServer])
 
   // Navigation functions with useCallback for performance
   const handleNavigate = useCallback((mode: ViewMode, dataCenter?: DataCenter, rack?: Rack, server?: Server) => {

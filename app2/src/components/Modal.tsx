@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useCallback } from 'react';
 import type { ServerData } from '../types/ServerData';
 
 interface ModalProps {
@@ -7,27 +7,29 @@ interface ModalProps {
 }
 
 function Modal({ server, onClose }: ModalProps) {
-  if (!server) return null;
-
   const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) {
       onClose();
     }
   };
 
-  const handleKeyDown = (e: KeyboardEvent) => {
+  const handleKeyDown = useCallback((e: KeyboardEvent) => {
     if (e.key === 'Escape') {
       onClose();
     }
-  };
+  }, [onClose]);
 
   // ESCキーのイベントリスナー
   useEffect(() => {
+    if (!server) return;
+
     document.addEventListener('keydown', handleKeyDown);
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, []);
+  }, [server, handleKeyDown]);
+
+  if (!server) return null;
 
   const getStatusColor = (value: number) => {
     if (value > 80) return '#ff4444';
