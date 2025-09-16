@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import './App.css'
 import './styles/Desktop.css'
 // Page components
@@ -185,6 +185,48 @@ function App() {
         break;
     }
   }, [viewMode]);
+
+  // Enhanced selection state preservation during data updates
+  useEffect(() => {
+    if (selectedDataCenter && dataCenters.length > 0) {
+      const updatedDC = dataCenters.find(dc => dc.id === selectedDataCenter.id);
+      if (updatedDC) {
+        // Preserve data center selection with updated data
+        setSelectedDataCenter(updatedDC);
+
+        if (selectedRack) {
+          const updatedRack = updatedDC.racks.find(r => r.id === selectedRack.id);
+          if (updatedRack) {
+            // Preserve rack selection with updated data
+            setSelectedRack(updatedRack);
+
+            if (selectedServer) {
+              const updatedServer = updatedRack.servers.find(s => s.id === selectedServer.id);
+              if (updatedServer) {
+                // Preserve server selection with updated data
+                setSelectedServer(updatedServer);
+              } else {
+                // Server no longer exists, reset to rack level
+                setSelectedServer(null);
+                setViewMode('servers');
+              }
+            }
+          } else {
+            // Rack no longer exists, reset to data center level
+            setSelectedRack(null);
+            setSelectedServer(null);
+            setViewMode('racks');
+          }
+        }
+      } else {
+        // Data center no longer exists, reset to overview
+        setSelectedDataCenter(null);
+        setSelectedRack(null);
+        setSelectedServer(null);
+        setViewMode('overview');
+      }
+    }
+  }, [dataCenters, selectedDataCenter, selectedRack, selectedServer]);
 
   const handleDialogCancel = useCallback(() => {
     setConfirmationDialog(prev => ({ ...prev, isOpen: false }));

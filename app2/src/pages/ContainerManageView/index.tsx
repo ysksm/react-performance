@@ -1,6 +1,6 @@
 import React from 'react';
 import type { Server, Container } from '../../types/ServerData';
-import { serverEquals } from '../../utils/dataComparison';
+// import { serverEquals } from '../../utils/dataComparison'; // 未使用
 
 interface ContainerManageViewProps {
   server: Server;
@@ -214,15 +214,15 @@ const ContainerManageView = React.memo<ContainerManageViewProps>(({ server, onCo
 
 ContainerManageView.displayName = 'ContainerManageView';
 
-const areEqual = (prevProps: ContainerManageViewProps, nextProps: ContainerManageViewProps) => {
+/* const areEqual = (prevProps: ContainerManageViewProps, nextProps: ContainerManageViewProps) => {
   return (
     serverEquals(prevProps.server, nextProps.server) &&
     prevProps.onContainerAction === nextProps.onContainerAction &&
     prevProps.onAddContainer === nextProps.onAddContainer &&
     prevProps.onBack === nextProps.onBack
   );
-};
+}; */
 
-const OptimizedContainerManageView = React.memo(ContainerManageView, areEqual);
-
-export { OptimizedContainerManageView as ContainerManageView };
+// const OptimizedContainerManageView = React.memo(ContainerManageView, areEqual);
+// Optimized版は過度な最適化でリアルタイム更新を妨げているため、通常版を使用
+export { ContainerManageView };

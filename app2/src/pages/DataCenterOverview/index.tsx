@@ -107,7 +107,7 @@ const DataCenterOverview = React.memo<DataCenterOverviewProps>(({ dataCenters, o
 
 DataCenterOverview.displayName = 'DataCenterOverview';
 
-const areEqual = (prevProps: DataCenterOverviewProps, nextProps: DataCenterOverviewProps) => {
+/* const areEqual = (prevProps: DataCenterOverviewProps, nextProps: DataCenterOverviewProps) => {
   if (prevProps.onDataCenterSelect !== nextProps.onDataCenterSelect) {
     return false;
   }
@@ -142,8 +142,8 @@ const areEqual = (prevProps: DataCenterOverviewProps, nextProps: DataCenterOverv
   }
 
   return true;
-};
+}; */
 
-const OptimizedDataCenterOverview = React.memo(DataCenterOverview, areEqual);
-
-export { OptimizedDataCenterOverview as DataCenterOverview };
+// const OptimizedDataCenterOverview = React.memo(DataCenterOverview, areEqual);
+// Optimized版は過度な最適化でリアルタイム更新を妨げているため、通常版を使用
+export { DataCenterOverview };

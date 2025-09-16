@@ -1,6 +1,6 @@
 import React from 'react';
 import type { DataCenter, Rack } from '../../types/ServerData';
-import { dataCenterEquals } from '../../utils/dataComparison';
+// import { dataCenterEquals } from '../../utils/dataComparison'; // 未使用
 
 interface RackListViewProps {
   dataCenter: DataCenter;
@@ -161,14 +161,14 @@ const RackListView = React.memo<RackListViewProps>(({ dataCenter, onRackSelect, 
 
 RackListView.displayName = 'RackListView';
 
-const areEqual = (prevProps: RackListViewProps, nextProps: RackListViewProps) => {
+/* const areEqual = (prevProps: RackListViewProps, nextProps: RackListViewProps) => {
   return (
     dataCenterEquals(prevProps.dataCenter, nextProps.dataCenter) &&
     prevProps.onRackSelect === nextProps.onRackSelect &&
     prevProps.onBack === nextProps.onBack
   );
-};
+}; */
 
-const OptimizedRackListView = React.memo(RackListView, areEqual);
-
-export { OptimizedRackListView as RackListView };
+// const OptimizedRackListView = React.memo(RackListView, areEqual);
+// Optimized版は過度な最適化でリアルタイム更新を妨げているため、通常版を使用
+export { RackListView };

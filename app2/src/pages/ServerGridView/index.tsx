@@ -1,6 +1,6 @@
 import React from 'react';
 import type { Rack, Server } from '../../types/ServerData';
-import { rackEquals } from '../../utils/dataComparison';
+// import { rackEquals } from '../../utils/dataComparison'; // 未使用
 
 interface ServerGridViewProps {
   rack: Rack;
@@ -212,15 +212,15 @@ const ServerGridView = React.memo<ServerGridViewProps>(({ rack, onServerSelect, 
 
 ServerGridView.displayName = 'ServerGridView';
 
-const areEqual = (prevProps: ServerGridViewProps, nextProps: ServerGridViewProps) => {
+/* const areEqual = (prevProps: ServerGridViewProps, nextProps: ServerGridViewProps) => {
   return (
     rackEquals(prevProps.rack, nextProps.rack) &&
     prevProps.onServerSelect === nextProps.onServerSelect &&
     prevProps.onServerAction === nextProps.onServerAction &&
     prevProps.onBack === nextProps.onBack
   );
-};
+}; */
 
-const OptimizedServerGridView = React.memo(ServerGridView, areEqual);
-
-export { OptimizedServerGridView as ServerGridView };
+// const OptimizedServerGridView = React.memo(ServerGridView, areEqual);
+// Optimized版は過度な最適化でリアルタイム更新を妨げているため、通常版を使用
+export { ServerGridView };
