@@ -21,6 +21,95 @@
 }
 
 .cell:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+  z-index: 10;
+}
+
+.cell:active {
+  transform: translateY(-1px) scale(0.98);
+}
+
+/* ローディングスケルトン */
+@keyframes skeleton-loading {
+  0% {
+    background-position: -200px 0;
+  }
+  100% {
+    background-position: calc(200px + 100%) 0;
+  }
+}
+
+.skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200px 100%;
+  animation: skeleton-loading 1.5s infinite;
+}
+
+/* 接続状態インジケーター */
+.connection-indicator {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: bold;
+  z-index: 1000;
+}
+
+.connection-online {
+  background: #4caf50;
+  color: white;
+}
+
+.connection-offline {
+  background: #f44336;
+  color: white;
+}
+
+.connection-reconnecting {
+  background: #ff9800;
+  color: white;
+}
+
+/* エラーリトライボタン */
+.retry-button {
+  background: #2196f3;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  margin-top: 10px;
+  transition: background 0.2s;
+}
+
+.retry-button:hover {
+  background: #1976d2;
+}
+
+.retry-button:active {
+  background: #0d47a1;
+}
+
+/* レスポンシブデザイン */
+@media (max-width: 768px) {
+  .grid {
+    grid-template-columns: repeat(5, 1fr) !important;
+    gap: 5px !important;
+    padding: 10px !important;
+  }
+
+  .cell {
+    padding: 5px !important;
+    font-size: 12px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .grid {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
 }

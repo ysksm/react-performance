@@ -11,6 +11,7 @@ interface GridProps {
 const OptimizedGrid = memo(function Grid({ servers, onCellClick }: GridProps) {
   return (
     <div
+      className="grid"
       style={{
         display: 'grid',
         gridTemplateColumns: 'repeat(10, 1fr)',

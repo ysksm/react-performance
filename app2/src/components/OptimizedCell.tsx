@@ -20,23 +20,33 @@ const OptimizedCell = memo(function Cell({ server, onClick }: CellProps) {
   };
 
   // CPU使用率に基づく境界線の色
-  const getBorderColor = (cpu: number) => {
+  const getBorderColor = (cpu: number, hasErrors: boolean) => {
+    if (hasErrors) return '#ff0000'; // エラーがある場合は赤
     if (cpu > 80) return '#ff4444';
     if (cpu > 60) return '#ffaa00';
-    return '#ccc';
+    return '#ddd';
   };
+
+  // エラー状態に基づく境界線スタイル
+  const getBorderStyle = (hasErrors: boolean) => {
+    return hasErrors ? '3px solid' : '2px solid';
+  };
+
+  const hasErrors = server.errors.length > 0;
 
   return (
     <div
       className="cell"
       onClick={handleClick}
       style={{
-        border: `2px solid ${getBorderColor(server.cpu)}`,
+        border: `${getBorderStyle(hasErrors)} ${getBorderColor(server.cpu, hasErrors)}`,
         padding: '10px',
         cursor: 'pointer',
         background: getBackgroundColor(server.cpu),
-        transition: 'all 0.2s',
-        position: 'relative'
+        transition: 'all 0.3s ease',
+        position: 'relative',
+        borderRadius: '8px',
+        boxShadow: hasErrors ? '0 0 10px rgba(255, 0, 0, 0.3)' : 'none'
       }}
     >
       <div style={{ fontSize: '12px', fontWeight: 'bold' }}>{server.id}</div>

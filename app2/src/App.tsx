@@ -3,6 +3,8 @@ import './App.css'
 // import Grid from './components/Grid'  // 非最適化版
 import OptimizedGrid from './components/OptimizedGrid'  // 最適化版
 import Modal from './components/Modal'
+import SkeletonGrid from './components/SkeletonGrid'
+import ConnectionIndicator from './components/ConnectionIndicator'
 import type { ServerData } from './types/ServerData'
 
 function App() {
@@ -11,9 +13,11 @@ function App() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null)
+  const [connectionStatus, setConnectionStatus] = useState<'online' | 'offline' | 'reconnecting'>('offline')
 
   const fetchServers = async () => {
     try {
+      setConnectionStatus('reconnecting')
       const response = await fetch('http://localhost:3001/api/servers')
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)
@@ -23,10 +27,14 @@ function App() {
       setLastUpdate(new Date())
       setLoading(false)
       setError(null)
+      setConnectionStatus('online')
     } catch (err) {
       console.error('Failed to fetch servers:', err)
       setError(err instanceof Error ? err.message : 'Failed to fetch servers')
-      setLoading(false)
+      setConnectionStatus('offline')
+      if (servers.length === 0) {
+        setLoading(false)
+      }
     }
   }
 
@@ -68,9 +76,11 @@ function App() {
 
   if (loading && servers.length === 0) {
     return (
-      <div style={{ padding: '20px', textAlign: 'center' }}>
-        <h1>Server Monitoring Dashboard</h1>
-        <p>Loading servers...</p>
+      <div style={{ padding: '20px' }}>
+        <h1 style={{ textAlign: 'center' }}>Server Monitoring Dashboard</h1>
+        <p style={{ textAlign: 'center', color: '#666' }}>Loading servers...</p>
+        <SkeletonGrid />
+        <ConnectionIndicator status={connectionStatus} lastUpdate={lastUpdate} />
       </div>
     )
   }
@@ -81,7 +91,10 @@ function App() {
         <h1>Server Monitoring Dashboard</h1>
         <p style={{ color: 'red' }}>Error: {error}</p>
         <p>Make sure the API server is running on port 3001</p>
-        <button onClick={fetchServers}>Retry</button>
+        <button className="retry-button" onClick={fetchServers}>
+          🔄 Retry Connection
+        </button>
+        <ConnectionIndicator status={connectionStatus} lastUpdate={lastUpdate} />
       </div>
     )
   }
@@ -90,12 +103,12 @@ function App() {
     <div style={{ padding: '20px' }}>
       <h1 style={{ textAlign: 'center' }}>Server Monitoring Dashboard</h1>
       <p style={{ textAlign: 'center', color: '#666' }}>
-        Click on any server to view details |
-        {lastUpdate && ` Last update: ${lastUpdate.toLocaleTimeString()}`}
-        {error && <span style={{ color: 'orange' }}> (Connection issues)</span>}
+        Click on any server to view details
+        {servers.length > 0 && ` | Monitoring ${servers.length} servers`}
       </p>
       <OptimizedGrid servers={servers} onCellClick={handleCellClick} />
       <Modal server={selectedServer} onClose={handleCloseModal} />
+      <ConnectionIndicator status={connectionStatus} lastUpdate={lastUpdate} />
     </div>
   )
 }
