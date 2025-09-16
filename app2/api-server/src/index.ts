@@ -9,10 +9,30 @@ const PORT = process.env.PORT || 3001;
 app.use(cors());
 app.use(express.json());
 
-// Generate random container data
-function generateContainer(serverId: string, index: number): Container {
+// Persistent state for realistic data evolution
+let dataState: DataCenter[] = [];
+let lastUpdateTime = Date.now();
+
+// Generate random container data with more realistic evolution
+function generateContainer(serverId: string, index: number, existingContainer?: Container): Container {
   const images = ['nginx:latest', 'redis:alpine', 'postgres:13', 'node:18', 'python:3.9', 'mongodb:latest'];
   const ports = ['8080:80', '3000:3000', '5432:5432', '6379:6379', '27017:27017'];
+
+  if (existingContainer) {
+    // Evolve existing container with small changes
+    const cpuChange = (Math.random() - 0.5) * 5; // ±2.5% change
+    const memoryChange = (Math.random() - 0.5) * 3; // ±1.5% change
+
+    return {
+      ...existingContainer,
+      cpu: Math.max(0, Math.min(100, existingContainer.cpu + cpuChange)),
+      memory: Math.max(0, Math.min(100, existingContainer.memory + memoryChange)),
+      // Status changes rarely
+      status: Math.random() > 0.95 ?
+        (['running', 'stopped', 'paused', 'error'][Math.floor(Math.random() * 4)] as any) :
+        existingContainer.status
+    };
+  }
 
   return {
     id: `${serverId}-container-${index}`,
@@ -26,9 +46,54 @@ function generateContainer(serverId: string, index: number): Container {
   };
 }
 
-// Generate random server data
-function generateServer(rackId: string, position: number): Server {
+// Generate random server data with evolution support
+function generateServer(rackId: string, position: number, existingServer?: Server): Server {
   const serverId = `${rackId}-server-${position}`;
+
+  if (existingServer) {
+    // Evolve existing server with realistic changes
+    const cpuChange = (Math.random() - 0.5) * 8; // ±4% change
+    const memoryChange = (Math.random() - 0.5) * 6; // ±3% change
+    const diskChange = (Math.random() - 0.5) * 2; // ±1% change
+    const networkChange = (Math.random() - 0.5) * 10; // ±5% change
+    const tempChange = (Math.random() - 0.5) * 4; // ±2°C change
+
+    const newCpu = Math.max(0, Math.min(100, existingServer.cpu + cpuChange));
+    const newMemory = Math.max(0, Math.min(100, existingServer.memory + memoryChange));
+    const newDisk = Math.max(0, Math.min(100, existingServer.disk + diskChange));
+    const newNetwork = Math.max(0, Math.min(100, existingServer.network + networkChange));
+    const newTemp = Math.max(15, Math.min(85, existingServer.temperature + tempChange));
+
+    // Update containers
+    const containers: Container[] = [];
+    for (let i = 0; i < existingServer.containers.length; i++) {
+      containers.push(generateContainer(serverId, i, existingServer.containers[i]));
+    }
+
+    // Occasionally add or remove containers
+    if (Math.random() > 0.98 && containers.length < 6) {
+      containers.push(generateContainer(serverId, containers.length));
+    } else if (Math.random() > 0.99 && containers.length > 2) {
+      containers.pop();
+    }
+
+    const hasErrors = newCpu > 90 || newMemory > 90 || newTemp > 80 || Math.random() > 0.95;
+    const hasWarnings = newCpu > 75 || newMemory > 75 || newTemp > 70;
+
+    return {
+      ...existingServer,
+      cpu: newCpu,
+      memory: newMemory,
+      disk: newDisk,
+      network: newNetwork,
+      temperature: newTemp,
+      errors: hasErrors ? ['Error: Connection timeout', 'Warning: High CPU usage'] : [],
+      status: hasErrors ? 'error' : hasWarnings ? 'warning' : 'running',
+      containers
+    };
+  }
+
+  // Generate new server
   const containerCount = Math.floor(Math.random() * 4) + 2; // 2-5 containers
   const containers: Container[] = [];
 
@@ -55,13 +120,22 @@ function generateServer(rackId: string, position: number): Server {
   };
 }
 
-// Generate rack data
-function generateRack(dataCenterId: string, position: number): Rack {
+// Generate rack data with evolution support
+function generateRack(dataCenterId: string, position: number, existingRack?: Rack): Rack {
   const rackId = `${dataCenterId}-rack-${position}`;
   const servers: Server[] = [];
 
-  for (let i = 0; i < 8; i++) { // 8 servers per rack
-    servers.push(generateServer(rackId, i));
+  if (existingRack) {
+    // Evolve existing rack by updating its servers
+    for (let i = 0; i < 8; i++) { // 8 servers per rack
+      const existingServer = existingRack.servers.find(s => s.position === i);
+      servers.push(generateServer(rackId, i, existingServer));
+    }
+  } else {
+    // Generate new rack
+    for (let i = 0; i < 8; i++) { // 8 servers per rack
+      servers.push(generateServer(rackId, i));
+    }
   }
 
   return {
@@ -72,12 +146,21 @@ function generateRack(dataCenterId: string, position: number): Rack {
   };
 }
 
-// Generate data center
-function generateDataCenter(id: string, name: string, location: string): DataCenter {
+// Generate data center with evolution support
+function generateDataCenter(id: string, name: string, location: string, existingDataCenter?: DataCenter): DataCenter {
   const racks: Rack[] = [];
 
-  for (let i = 0; i < 5; i++) { // 5 racks per data center
-    racks.push(generateRack(id, i));
+  if (existingDataCenter) {
+    // Evolve existing data center by updating its racks
+    for (let i = 0; i < 5; i++) { // 5 racks per data center
+      const existingRack = existingDataCenter.racks.find(r => r.position === i);
+      racks.push(generateRack(id, i, existingRack));
+    }
+  } else {
+    // Generate new data center
+    for (let i = 0; i < 5; i++) { // 5 racks per data center
+      racks.push(generateRack(id, i));
+    }
   }
 
   return {
@@ -88,13 +171,28 @@ function generateDataCenter(id: string, name: string, location: string): DataCen
   };
 }
 
-// Generate all data centers
+// Generate all data centers with evolution and state persistence
 function generateAllDataCenters(): DataCenter[] {
-  return [
-    generateDataCenter('dc-tokyo', 'Tokyo DC', 'Tokyo, Japan'),
-    generateDataCenter('dc-oregon', 'Oregon DC', 'Oregon, USA'),
-    generateDataCenter('dc-ireland', 'Ireland DC', 'Dublin, Ireland')
-  ];
+  const now = Date.now();
+
+  // Initialize state if empty or if it's been too long since last update
+  if (dataState.length === 0 || (now - lastUpdateTime) > 300000) { // 5 minutes reset
+    dataState = [
+      generateDataCenter('dc-tokyo', 'Tokyo DC', 'Tokyo, Japan'),
+      generateDataCenter('dc-oregon', 'Oregon DC', 'Oregon, USA'),
+      generateDataCenter('dc-ireland', 'Ireland DC', 'Dublin, Ireland')
+    ];
+  } else {
+    // Evolve existing state
+    dataState = [
+      generateDataCenter('dc-tokyo', 'Tokyo DC', 'Tokyo, Japan', dataState.find(dc => dc.id === 'dc-tokyo')),
+      generateDataCenter('dc-oregon', 'Oregon DC', 'Oregon, USA', dataState.find(dc => dc.id === 'dc-oregon')),
+      generateDataCenter('dc-ireland', 'Ireland DC', 'Dublin, Ireland', dataState.find(dc => dc.id === 'dc-ireland'))
+    ];
+  }
+
+  lastUpdateTime = now;
+  return dataState;
 }
 
 // Legacy function for backward compatibility
@@ -122,11 +220,47 @@ function generateAllServersData(): ServerData[] {
 
 // Routes
 
-// New hierarchical data endpoint
+// New hierarchical data endpoint with enhanced monitoring
 app.get('/api/datacenters', (_req, res) => {
-  const datacenters = generateAllDataCenters();
-  res.json(datacenters);
+  try {
+    const startTime = Date.now();
+    const datacenters = generateAllDataCenters();
+    const processingTime = Date.now() - startTime;
+
+    // Add metadata headers for monitoring
+    res.setHeader('X-Data-Generation-Time', processingTime.toString());
+    res.setHeader('X-Data-Timestamp', new Date().toISOString());
+    res.setHeader('X-Total-Entities', getTotalEntityCount(datacenters).toString());
+
+    // Enhanced CORS headers for better client compatibility
+    res.setHeader('Access-Control-Expose-Headers', 'X-Data-Generation-Time,X-Data-Timestamp,X-Total-Entities');
+
+    console.log(`Generated hierarchical data: ${datacenters.length} DCs, processing time: ${processingTime}ms`);
+    res.json(datacenters);
+  } catch (error) {
+    console.error('Error generating datacenter data:', error);
+    res.status(500).json({
+      error: 'Internal server error',
+      message: 'Failed to generate datacenter data',
+      timestamp: new Date().toISOString()
+    });
+  }
 });
+
+// Helper function to count total entities
+function getTotalEntityCount(datacenters: DataCenter[]): number {
+  let total = datacenters.length; // Data centers
+  datacenters.forEach(dc => {
+    total += dc.racks.length; // Racks
+    dc.racks.forEach(rack => {
+      total += rack.servers.length; // Servers
+      rack.servers.forEach(server => {
+        total += server.containers.length; // Containers
+      });
+    });
+  });
+  return total;
+}
 
 // Legacy endpoint for backward compatibility
 app.get('/api/servers', (_req, res) => {
