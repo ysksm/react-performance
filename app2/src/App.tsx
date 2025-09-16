@@ -5,6 +5,7 @@ import { DataCenterOverview } from './components/DataCenterOverview'
 import { RackListView } from './components/RackListView'
 import { ServerGridView } from './components/ServerGridView'
 import { ContainerManageView } from './components/ContainerManageView'
+import { SkeletonLoader } from './components/SkeletonLoader'
 import ConnectionIndicator from './components/ConnectionIndicator'
 import type { DataCenter, Rack, Server, Container, ViewMode } from './types/ServerData'
 
@@ -144,12 +145,21 @@ function App() {
 
   if (loading && dataCenters.length === 0) {
     return (
-      <div style={{ padding: '20px' }}>
-        <h1 style={{ textAlign: 'center' }}>Data Center Monitoring Dashboard</h1>
-        <p style={{ textAlign: 'center', color: '#666' }}>Loading data centers...</p>
-        <div style={{ textAlign: 'center', padding: '40px' }}>
-          <div className="loading-spinner">Loading...</div>
-        </div>
+      <div className="app">
+        <header className="app-header">
+          <h1>Data Center Monitoring Dashboard</h1>
+          <p className="app-subtitle">Loading hierarchical infrastructure data...</p>
+        </header>
+
+        <NavigationBreadcrumb
+          viewMode="overview"
+          onNavigate={() => {}}
+        />
+
+        <main className="app-main">
+          <SkeletonLoader mode="overview" />
+        </main>
+
         <ConnectionIndicator status={connectionStatus} lastUpdate={lastUpdate} />
       </div>
     )

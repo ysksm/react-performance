@@ -1,8 +1,92 @@
-#root {
-  max-width: 1280px;
+/* Application Layout */
+.app {
+  min-height: 100vh;
+  background: #f5f5f5;
+}
+
+.app-header {
+  background: #1976d2;
+  color: white;
+  padding: 1rem 2rem;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.app-header h1 {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 300;
+}
+
+.app-subtitle {
+  margin: 0.5rem 0 0 0;
+  opacity: 0.9;
+  font-size: 1rem;
+}
+
+.app-main {
+  max-width: 1400px;
   margin: 0 auto;
   padding: 2rem;
-  text-align: center;
+}
+
+/* Navigation Breadcrumb */
+.navigation-breadcrumb {
+  background: white;
+  padding: 1rem 2rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.breadcrumb-container {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.breadcrumb-item {
+  background: none;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  color: #666;
+  transition: all 0.2s;
+}
+
+.breadcrumb-item.clickable:hover {
+  background: #e3f2fd;
+  color: #1976d2;
+}
+
+.breadcrumb-item.active {
+  background: #1976d2;
+  color: white;
+  font-weight: 500;
+}
+
+.breadcrumb-item:disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+
+.breadcrumb-separator {
+  color: #ccc;
+  margin: 0 0.25rem;
+}
+
+.view-mode-indicator {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.current-mode {
+  padding: 0.25rem 0.75rem;
+  background: #f0f0f0;
+  border-radius: 12px;
 }
 
 @keyframes pulse {
@@ -96,6 +180,138 @@
 
 /* レスポンシブデザイン */
 @media (max-width: 768px) {
+  .app-main {
+    padding: 1rem;
+  }
+
+  .app-header {
+    padding: 0.75rem 1rem;
+  }
+
+  .app-header h1 {
+    font-size: 1.5rem;
+  }
+
+  .navigation-breadcrumb {
+    padding: 0.75rem 1rem;
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: flex-start;
+  }
+
+  .breadcrumb-container {
+    flex-wrap: wrap;
+  }
+
+  .breadcrumb-item {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.8rem;
+  }
+
+  /* DataCenter Overview Mobile */
+  .datacenter-grid {
+    grid-template-columns: 1fr !important;
+    gap: 1rem !important;
+  }
+
+  .datacenter-card {
+    padding: 1rem !important;
+  }
+
+  .datacenter-stats {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  /* Rack List Mobile */
+  .rack-grid {
+    grid-template-columns: 1fr !important;
+    gap: 1rem !important;
+  }
+
+  .rack-card {
+    padding: 1rem !important;
+  }
+
+  .rack-stats .stats-row {
+    flex-direction: column !important;
+    gap: 0.5rem !important;
+  }
+
+  .stat-group {
+    flex-direction: row !important;
+    justify-content: space-between !important;
+  }
+
+  /* Server Grid Mobile */
+  .servers-grid {
+    grid-template-columns: 1fr !important;
+    gap: 1rem !important;
+  }
+
+  .server-card {
+    padding: 1rem !important;
+  }
+
+  .server-actions {
+    flex-direction: column !important;
+    gap: 0.5rem !important;
+  }
+
+  .action-buttons {
+    display: flex !important;
+    gap: 0.5rem !important;
+  }
+
+  .action-btn {
+    flex: 1 !important;
+    padding: 0.5rem !important;
+    font-size: 0.8rem !important;
+  }
+
+  /* Container Management Mobile */
+  .container-manage-view .view-header .header-content {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 1rem !important;
+  }
+
+  .container-actions-panel {
+    flex-direction: column !important;
+    gap: 1rem !important;
+  }
+
+  .quick-stats {
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    gap: 0.5rem !important;
+  }
+
+  .container-card {
+    padding: 1rem !important;
+  }
+
+  .container-details .details-row {
+    flex-direction: column !important;
+    gap: 0.5rem !important;
+  }
+
+  .container-actions {
+    flex-direction: column !important;
+    gap: 0.5rem !important;
+  }
+
+  .action-group {
+    display: flex !important;
+    gap: 0.5rem !important;
+  }
+
+  .action-group .action-btn {
+    flex: 1 !important;
+    padding: 0.5rem !important;
+    font-size: 0.8rem !important;
+  }
+
+  /* Legacy grid compatibility */
   .grid {
     grid-template-columns: repeat(5, 1fr) !important;
     gap: 5px !important;
@@ -109,7 +325,412 @@
 }
 
 @media (max-width: 480px) {
+  .app-header h1 {
+    font-size: 1.25rem;
+  }
+
+  .breadcrumb-item {
+    padding: 0.25rem 0.4rem;
+    font-size: 0.75rem;
+  }
+
+  /* Extra small screens - stack everything */
+  .datacenter-stats {
+    grid-template-columns: 1fr !important;
+  }
+
+  .rack-stats .stat-group,
+  .quick-stats .stat-item {
+    min-width: 100% !important;
+  }
+
+  .action-group {
+    flex-direction: column !important;
+  }
+
+  .action-group .action-btn {
+    width: 100% !important;
+  }
+
+  /* Legacy grid compatibility */
   .grid {
     grid-template-columns: repeat(3, 1fr) !important;
+  }
+}
+
+/* Tablet responsive design */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .app-main {
+    max-width: 100%;
+    padding: 1.5rem;
+  }
+
+  /* DataCenter Overview Tablet */
+  .datacenter-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  /* Rack List Tablet */
+  .rack-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  /* Server Grid Tablet */
+  .servers-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  .server-card {
+    padding: 1.25rem !important;
+  }
+
+  /* Container Management Tablet */
+  .container-card {
+    padding: 1.25rem !important;
+  }
+
+  .container-actions {
+    flex-direction: row !important;
+    justify-content: space-between !important;
+  }
+
+  .action-group {
+    display: flex !important;
+    gap: 0.5rem !important;
+  }
+}
+
+/* 階層深度に応じたUI調整 */
+.hierarchy-depth-1 {
+  --primary-color: #1976d2;
+  --background-shade: #f5f5f5;
+}
+
+.hierarchy-depth-2 {
+  --primary-color: #1565c0;
+  --background-shade: #f0f4f8;
+}
+
+.hierarchy-depth-3 {
+  --primary-color: #0d47a1;
+  --background-shade: #e8f0fe;
+}
+
+.hierarchy-depth-4 {
+  --primary-color: #01579b;
+  --background-shade: #e1efff;
+}
+
+/* ナビゲーション階層インジケーター */
+.navigation-depth-indicator {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: var(--primary-color, #1976d2);
+}
+
+.hierarchy-depth-1 .navigation-depth-indicator {
+  background: #1976d2;
+}
+
+.hierarchy-depth-2 .navigation-depth-indicator {
+  background: #1565c0;
+}
+
+.hierarchy-depth-3 .navigation-depth-indicator {
+  background: #0d47a1;
+}
+
+.hierarchy-depth-4 .navigation-depth-indicator {
+  background: #01579b;
+}
+
+/* 階層別カードスタイリング */
+.datacenter-card,
+.rack-card,
+.server-card,
+.container-card {
+  position: relative;
+  border-left: 4px solid transparent;
+}
+
+.datacenter-card {
+  border-left-color: #1976d2;
+  background: linear-gradient(135deg, #f5f5f5 0%, #e8f0fe 100%);
+}
+
+.rack-card {
+  border-left-color: #1565c0;
+  background: linear-gradient(135deg, #f0f4f8 0%, #e3f2fd 100%);
+}
+
+.server-card {
+  border-left-color: #0d47a1;
+  background: linear-gradient(135deg, #e8f0fe 0%, #e1f5fe 100%);
+}
+
+.container-card {
+  border-left-color: #01579b;
+  background: linear-gradient(135deg, #e1efff 0%, #e0f2f1 100%);
+}
+
+/* 階層レベル表示 */
+.hierarchy-level-badge {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background: rgba(25, 118, 210, 0.1);
+  color: #1976d2;
+  padding: 0.25rem 0.5rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.hierarchy-depth-2 .hierarchy-level-badge {
+  background: rgba(21, 101, 192, 0.1);
+  color: #1565c0;
+}
+
+.hierarchy-depth-3 .hierarchy-level-badge {
+  background: rgba(13, 71, 161, 0.1);
+  color: #0d47a1;
+}
+
+.hierarchy-depth-4 .hierarchy-level-badge {
+  background: rgba(1, 87, 155, 0.1);
+  color: #01579b;
+}
+
+/* スケルトンローディング - 全モード対応 */
+.skeleton-container {
+  padding: 2rem;
+}
+
+.skeleton-header {
+  margin-bottom: 2rem;
+}
+
+.skeleton-title {
+  height: 2rem;
+  width: 300px;
+  margin-bottom: 0.5rem;
+}
+
+.skeleton-subtitle {
+  height: 1rem;
+  width: 200px;
+  margin-bottom: 1rem;
+}
+
+.skeleton-back-button {
+  height: 2.5rem;
+  width: 120px;
+  margin-bottom: 1rem;
+}
+
+/* Overview Mode Skeletons */
+.skeleton-container.overview .datacenter-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.skeleton-card {
+  padding: 1.5rem;
+  border-radius: 8px;
+  background: white;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.skeleton-card-title {
+  height: 1.5rem;
+  width: 200px;
+  margin-bottom: 0.5rem;
+}
+
+.skeleton-location {
+  height: 1rem;
+  width: 150px;
+  margin-bottom: 1rem;
+}
+
+.skeleton-stat-label {
+  height: 0.875rem;
+  width: 80px;
+  margin-bottom: 0.25rem;
+}
+
+.skeleton-stat-value {
+  height: 1.25rem;
+  width: 60px;
+}
+
+.skeleton-status-indicator {
+  height: 1.5rem;
+  width: 100px;
+  margin-top: 1rem;
+}
+
+/* Racks Mode Skeletons */
+.skeleton-container.racks .rack-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+.skeleton-rack-name {
+  height: 1.5rem;
+  width: 120px;
+}
+
+.skeleton-position {
+  height: 1rem;
+  width: 80px;
+}
+
+.skeleton-status-icon {
+  height: 1.5rem;
+  width: 1.5rem;
+  border-radius: 50%;
+}
+
+.skeleton-status-text {
+  height: 1rem;
+  width: 100px;
+}
+
+/* Servers Mode Skeletons */
+.skeleton-container.servers .servers-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.skeleton-server-name {
+  height: 1.25rem;
+  width: 100px;
+}
+
+.skeleton-server-position {
+  height: 1rem;
+  width: 60px;
+}
+
+.skeleton-metric-label {
+  height: 0.875rem;
+  width: 50px;
+}
+
+.skeleton-metric-value {
+  height: 1rem;
+  width: 40px;
+}
+
+.skeleton-container-badge {
+  height: 1.5rem;
+  width: 80px;
+  border-radius: 12px;
+  margin-right: 0.5rem;
+}
+
+.skeleton-primary-button {
+  height: 2.5rem;
+  width: 140px;
+  border-radius: 4px;
+  margin-bottom: 0.5rem;
+}
+
+.skeleton-action-button {
+  height: 2rem;
+  width: 80px;
+  border-radius: 4px;
+  margin-right: 0.5rem;
+}
+
+/* Containers Mode Skeletons */
+.skeleton-container.containers .container-actions-panel {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding: 1rem;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.skeleton-add-button {
+  height: 2.5rem;
+  width: 160px;
+  border-radius: 4px;
+}
+
+.skeleton-container.containers .quick-stats {
+  display: flex;
+  gap: 1rem;
+}
+
+.skeleton-container.containers .containers-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.skeleton-container-icon {
+  height: 2rem;
+  width: 2rem;
+  border-radius: 4px;
+}
+
+.skeleton-container-name {
+  height: 1.25rem;
+  width: 120px;
+  margin-bottom: 0.25rem;
+}
+
+.skeleton-container-image {
+  height: 1rem;
+  width: 180px;
+}
+
+.skeleton-detail-label {
+  height: 0.875rem;
+  width: 70px;
+}
+
+.skeleton-detail-value {
+  height: 1rem;
+  width: 50px;
+}
+
+.skeleton-remove-button {
+  height: 2rem;
+  width: 80px;
+  border-radius: 4px;
+}
+
+/* Responsive Skeleton Adjustments */
+@media (max-width: 768px) {
+  .skeleton-container {
+    padding: 1rem;
+  }
+
+  .skeleton-container.overview .datacenter-grid,
+  .skeleton-container.racks .rack-grid,
+  .skeleton-container.servers .servers-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .skeleton-container.containers .container-actions-panel {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: stretch;
+  }
+
+  .skeleton-container.containers .quick-stats {
+    flex-wrap: wrap;
   }
 }
