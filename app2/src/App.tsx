@@ -1,38 +1,47 @@
 import { useState, useEffect, useCallback } from 'react'
 import './App.css'
-// import Grid from './components/Grid'  // 非最適化版
-import OptimizedGrid from './components/OptimizedGrid'  // 最適化版
-import Modal from './components/Modal'
-import SkeletonGrid from './components/SkeletonGrid'
+import { NavigationBreadcrumb } from './components/NavigationBreadcrumb'
+import { DataCenterOverview } from './components/DataCenterOverview'
+import { RackListView } from './components/RackListView'
+import { ServerGridView } from './components/ServerGridView'
+import { ContainerManageView } from './components/ContainerManageView'
 import ConnectionIndicator from './components/ConnectionIndicator'
-import type { ServerData } from './types/ServerData'
+import type { DataCenter, Rack, Server, Container, ViewMode } from './types/ServerData'
 
 function App() {
-  const [servers, setServers] = useState<ServerData[]>([])
-  const [selectedServer, setSelectedServer] = useState<ServerData | null>(null)
+  // Hierarchical data state
+  const [dataCenters, setDataCenters] = useState<DataCenter[]>([])
+
+  // Navigation state
+  const [viewMode, setViewMode] = useState<ViewMode>('overview')
+  const [selectedDataCenter, setSelectedDataCenter] = useState<DataCenter | null>(null)
+  const [selectedRack, setSelectedRack] = useState<Rack | null>(null)
+  const [selectedServer, setSelectedServer] = useState<Server | null>(null)
+
+  // Loading and error state
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null)
   const [connectionStatus, setConnectionStatus] = useState<'online' | 'offline' | 'reconnecting'>('offline')
 
-  const fetchServers = async () => {
+  const fetchDataCenters = async () => {
     try {
       setConnectionStatus('reconnecting')
-      const response = await fetch('http://localhost:3001/api/servers')
+      const response = await fetch('http://localhost:3001/api/datacenters')
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)
       }
       const data = await response.json()
-      setServers(data)
+      setDataCenters(data)
       setLastUpdate(new Date())
       setLoading(false)
       setError(null)
       setConnectionStatus('online')
     } catch (err) {
-      console.error('Failed to fetch servers:', err)
-      setError(err instanceof Error ? err.message : 'Failed to fetch servers')
+      console.error('Failed to fetch data centers:', err)
+      setError(err instanceof Error ? err.message : 'Failed to fetch data centers')
       setConnectionStatus('offline')
-      if (servers.length === 0) {
+      if (dataCenters.length === 0) {
         setLoading(false)
       }
     }
@@ -40,10 +49,10 @@ function App() {
 
   useEffect(() => {
     // Initial fetch
-    fetchServers()
+    fetchDataCenters()
 
     // Set up polling every 1 second
-    const interval = setInterval(fetchServers, 1000)
+    const interval = setInterval(fetchDataCenters, 1000)
 
     // Cleanup function
     return () => {
@@ -51,47 +60,108 @@ function App() {
     }
   }, [])
 
-  // 選択中のサーバーのデータを更新
+  // Update selected objects when data refreshes
   useEffect(() => {
-    if (selectedServer) {
-      const updatedServer = servers.find(s => s.id === selectedServer.id);
-      if (updatedServer) {
-        setSelectedServer(updatedServer);
+    if (selectedDataCenter) {
+      const updatedDC = dataCenters.find(dc => dc.id === selectedDataCenter.id);
+      if (updatedDC) {
+        setSelectedDataCenter(updatedDC);
+
+        if (selectedRack) {
+          const updatedRack = updatedDC.racks.find(r => r.id === selectedRack.id);
+          if (updatedRack) {
+            setSelectedRack(updatedRack);
+
+            if (selectedServer) {
+              const updatedServer = updatedRack.servers.find(s => s.id === selectedServer.id);
+              if (updatedServer) {
+                setSelectedServer(updatedServer);
+              }
+            }
+          }
+        }
       }
     }
-  }, [servers, selectedServer?.id])
+  }, [dataCenters, selectedDataCenter?.id, selectedRack?.id, selectedServer?.id])
 
-  // useCallbackで関数をメモ化
-  const handleCellClick = useCallback((server: ServerData) => {
-    // 選択されたサーバーのIDから最新のデータを取得
-    const currentServer = servers.find(s => s.id === server.id);
-    if (currentServer) {
-      setSelectedServer(currentServer);
-    }
-  }, [servers])
+  // Navigation functions with useCallback for performance
+  const handleNavigate = useCallback((mode: ViewMode, dataCenter?: DataCenter, rack?: Rack, server?: Server) => {
+    setViewMode(mode);
+    setSelectedDataCenter(dataCenter || null);
+    setSelectedRack(rack || null);
+    setSelectedServer(server || null);
+  }, []);
 
-  const handleCloseModal = useCallback(() => {
+  const handleDataCenterSelect = useCallback((dataCenter: DataCenter) => {
+    setSelectedDataCenter(dataCenter);
+    setSelectedRack(null);
     setSelectedServer(null);
-  }, [])
+    setViewMode('racks');
+  }, []);
 
-  if (loading && servers.length === 0) {
+  const handleRackSelect = useCallback((rack: Rack) => {
+    setSelectedRack(rack);
+    setSelectedServer(null);
+    setViewMode('servers');
+  }, []);
+
+  const handleServerSelect = useCallback((server: Server) => {
+    setSelectedServer(server);
+    setViewMode('containers');
+  }, []);
+
+  const handleServerAction = useCallback((server: Server, action: 'start' | 'stop' | 'restart') => {
+    // TODO: Implement server action API calls
+    console.log(`Server action: ${action} on ${server.name}`);
+  }, []);
+
+  const handleContainerAction = useCallback((container: Container, action: 'start' | 'stop' | 'pause' | 'remove') => {
+    // TODO: Implement container action API calls
+    console.log(`Container action: ${action} on ${container.name}`);
+  }, []);
+
+  const handleAddContainer = useCallback((serverId: string) => {
+    // TODO: Implement add container API call
+    console.log(`Add container to server: ${serverId}`);
+  }, []);
+
+  const handleBack = useCallback(() => {
+    switch (viewMode) {
+      case 'racks':
+        setViewMode('overview');
+        setSelectedDataCenter(null);
+        break;
+      case 'servers':
+        setViewMode('racks');
+        setSelectedRack(null);
+        break;
+      case 'containers':
+        setViewMode('servers');
+        setSelectedServer(null);
+        break;
+    }
+  }, [viewMode]);
+
+  if (loading && dataCenters.length === 0) {
     return (
       <div style={{ padding: '20px' }}>
-        <h1 style={{ textAlign: 'center' }}>Server Monitoring Dashboard</h1>
-        <p style={{ textAlign: 'center', color: '#666' }}>Loading servers...</p>
-        <SkeletonGrid />
+        <h1 style={{ textAlign: 'center' }}>Data Center Monitoring Dashboard</h1>
+        <p style={{ textAlign: 'center', color: '#666' }}>Loading data centers...</p>
+        <div style={{ textAlign: 'center', padding: '40px' }}>
+          <div className="loading-spinner">Loading...</div>
+        </div>
         <ConnectionIndicator status={connectionStatus} lastUpdate={lastUpdate} />
       </div>
     )
   }
 
-  if (error && servers.length === 0) {
+  if (error && dataCenters.length === 0) {
     return (
       <div style={{ padding: '20px', textAlign: 'center' }}>
-        <h1>Server Monitoring Dashboard</h1>
+        <h1>Data Center Monitoring Dashboard</h1>
         <p style={{ color: 'red' }}>Error: {error}</p>
         <p>Make sure the API server is running on port 3001</p>
-        <button className="retry-button" onClick={fetchServers}>
+        <button className="retry-button" onClick={fetchDataCenters}>
           🔄 Retry Connection
         </button>
         <ConnectionIndicator status={connectionStatus} lastUpdate={lastUpdate} />
@@ -99,15 +169,74 @@ function App() {
     )
   }
 
+  const renderCurrentView = () => {
+    switch (viewMode) {
+      case 'overview':
+        return (
+          <DataCenterOverview
+            dataCenters={dataCenters}
+            onDataCenterSelect={handleDataCenterSelect}
+          />
+        );
+
+      case 'racks':
+        if (!selectedDataCenter) return null;
+        return (
+          <RackListView
+            dataCenter={selectedDataCenter}
+            onRackSelect={handleRackSelect}
+            onBack={handleBack}
+          />
+        );
+
+      case 'servers':
+        if (!selectedRack) return null;
+        return (
+          <ServerGridView
+            rack={selectedRack}
+            onServerSelect={handleServerSelect}
+            onServerAction={handleServerAction}
+            onBack={handleBack}
+          />
+        );
+
+      case 'containers':
+        if (!selectedServer) return null;
+        return (
+          <ContainerManageView
+            server={selectedServer}
+            onContainerAction={handleContainerAction}
+            onAddContainer={handleAddContainer}
+            onBack={handleBack}
+          />
+        );
+
+      default:
+        return null;
+    }
+  };
+
   return (
-    <div style={{ padding: '20px' }}>
-      <h1 style={{ textAlign: 'center' }}>Server Monitoring Dashboard</h1>
-      <p style={{ textAlign: 'center', color: '#666' }}>
-        Click on any server to view details
-        {servers.length > 0 && ` | Monitoring ${servers.length} servers`}
-      </p>
-      <OptimizedGrid servers={servers} onCellClick={handleCellClick} />
-      <Modal server={selectedServer} onClose={handleCloseModal} />
+    <div className="app">
+      <header className="app-header">
+        <h1>Data Center Monitoring Dashboard</h1>
+        <p className="app-subtitle">
+          Hierarchical infrastructure monitoring with real-time updates
+        </p>
+      </header>
+
+      <NavigationBreadcrumb
+        viewMode={viewMode}
+        dataCenter={selectedDataCenter || undefined}
+        rack={selectedRack || undefined}
+        server={selectedServer || undefined}
+        onNavigate={handleNavigate}
+      />
+
+      <main className="app-main">
+        {renderCurrentView()}
+      </main>
+
       <ConnectionIndicator status={connectionStatus} lastUpdate={lastUpdate} />
     </div>
   )

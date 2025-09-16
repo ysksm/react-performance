@@ -6,63 +6,63 @@
 
 ---
 
-## Phase 0: 階層データ構造基盤構築 (0/12) 🔴
+## Phase 0: 階層データ構造基盤構築 (12/12) 🟢
 
 ### データ型定義
-- [ ] DataCenter インターフェース定義
-- [ ] Rack インターフェース定義
-- [ ] Server インターフェース定義（containers配列追加）
-- [ ] Container インターフェース定義
-- [ ] ViewMode 型定義（'overview' | 'racks' | 'servers' | 'containers'）
+- [x] DataCenter インターフェース定義
+- [x] Rack インターフェース定義
+- [x] Server インターフェース定義（containers配列追加）
+- [x] Container インターフェース定義
+- [x] ViewMode 型定義（'overview' | 'racks' | 'servers' | 'containers'）
 
 ### サーバー側データ生成
-- [ ] 階層データ生成関数作成
-- [ ] 3データセンター × 5ラック × 8サーバー構造実装
-- [ ] コンテナランダム生成（各サーバー2-5コンテナ）
-- [ ] GET /api/datacenters エンドポイント更新
+- [x] 階層データ生成関数作成
+- [x] 3データセンター × 5ラック × 8サーバー構造実装
+- [x] コンテナランダム生成（各サーバー2-5コンテナ）
+- [x] GET /api/datacenters エンドポイント更新
 
 ### クライアント側基盤
-- [ ] 階層データ型定義ファイル作成
-- [ ] ViewModeの状態管理設計
-- [ ] 階層選択状態の管理（selectedDataCenter, selectedRack, selectedServer）
+- [x] 階層データ型定義ファイル作成
+- [x] ViewModeの状態管理設計
+- [x] 階層選択状態の管理（selectedDataCenter, selectedRack, selectedServer）
 
 ---
 
-## Phase 1: 表示モード実装 (0/16) 🔴
+## Phase 1: 表示モード実装 (16/16) 🟢
 
 ### モード1: データセンター全体表示
-- [ ] DataCenterOverview コンポーネント作成
-- [ ] データセンターカード表示（場所、ラック数、サーバー数、アラート数）
-- [ ] データセンター選択機能
-- [ ] 概要統計情報表示
+- [x] DataCenterOverview コンポーネント作成
+- [x] データセンターカード表示（場所、ラック数、サーバー数、アラート数）
+- [x] データセンター選択機能
+- [x] 概要統計情報表示
 
 ### モード2: ラック一覧表示
-- [ ] RackListView コンポーネント作成
-- [ ] ラックカード表示（サーバー数、使用率、アラート）
-- [ ] ラック選択機能
-- [ ] データセンターへの戻るボタン
+- [x] RackListView コンポーネント作成
+- [x] ラックカード表示（サーバー数、使用率、アラート）
+- [x] ラック選択機能
+- [x] データセンターへの戻るボタン
 
 ### モード3: サーバーグリッド表示
-- [ ] ServerGridView コンポーネント作成
-- [ ] ServerCell コンポーネント作成（コンテナ数表示付き）
-- [ ] サーバー選択機能
-- [ ] ラック一覧への戻るボタン
+- [x] ServerGridView コンポーネント作成
+- [x] ServerCell コンポーネント作成（コンテナ数表示付き）
+- [x] サーバー選択機能
+- [x] ラック一覧への戻るボタン
 
 ### モード4: コンテナ管理ビュー
-- [ ] ContainerManageView コンポーネント作成
-- [ ] ContainerList コンポーネント作成
-- [ ] ContainerCard コンポーネント作成
-- [ ] ContainerActionPanel コンポーネント作成（追加機能）
-- [ ] サーバーグリッドへの戻るボタン
+- [x] ContainerManageView コンポーネント作成
+- [x] ContainerList コンポーネント作成
+- [x] ContainerCard コンポーネント作成
+- [x] ContainerActionPanel コンポーネント作成（追加機能）
+- [x] サーバーグリッドへの戻るボタン
 
 ---
 
-## Phase 2: ナビゲーション・UI構築 (0/10) 🔴
+## Phase 2: ナビゲーション・UI構築 (3/10) 🟡
 
 ### パンくずナビゲーション
-- [ ] NavigationBreadcrumb コンポーネント作成
-- [ ] 階層表示（データセンター > ラック > サーバー > コンテナ）
-- [ ] クリック可能な階層ナビゲーション
+- [x] NavigationBreadcrumb コンポーネント作成
+- [x] 階層表示（データセンター > ラック > サーバー > コンテナ）
+- [x] クリック可能な階層ナビゲーション
 
 ### 表示モード切り替え
 - [ ] ViewMode状態管理の実装
