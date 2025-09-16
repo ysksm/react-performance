@@ -1,6 +1,8 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import './App.css'
-import Grid from './components/Grid'
+// import Grid from './components/Grid'  // 非最適化版
+import OptimizedGrid from './components/OptimizedGrid'  // 最適化版
+import Modal from './components/Modal'
 import type { ServerData } from './types/ServerData'
 
 function App() {
@@ -41,10 +43,28 @@ function App() {
     }
   }, [])
 
-  const handleCellClick = (server: ServerData) => {
-    setSelectedServer(server)
-    console.log('Selected server:', server)
-  }
+  // 選択中のサーバーのデータを更新
+  useEffect(() => {
+    if (selectedServer) {
+      const updatedServer = servers.find(s => s.id === selectedServer.id);
+      if (updatedServer) {
+        setSelectedServer(updatedServer);
+      }
+    }
+  }, [servers, selectedServer?.id])
+
+  // useCallbackで関数をメモ化
+  const handleCellClick = useCallback((server: ServerData) => {
+    // 選択されたサーバーのIDから最新のデータを取得
+    const currentServer = servers.find(s => s.id === server.id);
+    if (currentServer) {
+      setSelectedServer(currentServer);
+    }
+  }, [servers])
+
+  const handleCloseModal = useCallback(() => {
+    setSelectedServer(null);
+  }, [])
 
   if (loading && servers.length === 0) {
     return (
@@ -74,20 +94,8 @@ function App() {
         {lastUpdate && ` Last update: ${lastUpdate.toLocaleTimeString()}`}
         {error && <span style={{ color: 'orange' }}> (Connection issues)</span>}
       </p>
-      <Grid servers={servers} onCellClick={handleCellClick} />
-      {selectedServer && (
-        <div style={{
-          position: 'fixed',
-          bottom: '20px',
-          left: '20px',
-          background: '#333',
-          color: 'white',
-          padding: '10px',
-          borderRadius: '5px'
-        }}>
-          Selected: {selectedServer.id}
-        </div>
-      )}
+      <OptimizedGrid servers={servers} onCellClick={handleCellClick} />
+      <Modal server={selectedServer} onClose={handleCloseModal} />
     </div>
   )
 }
